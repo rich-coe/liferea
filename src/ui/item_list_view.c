@@ -958,11 +958,12 @@ on_popup_copy_URL_clipboard (void)
 	item = itemlist_get_selected ();
 	if (item) {
 		gchar *link = item_make_link (item);
-
-		gtk_clipboard_set_text (gtk_clipboard_get (GDK_SELECTION_PRIMARY), link, -1);
-		gtk_clipboard_set_text (gtk_clipboard_get (GDK_SELECTION_CLIPBOARD), link, -1);
-
-		g_free (link);
+                if (link) {
+                        gtk_clipboard_set_text (gtk_clipboard_get (GDK_SELECTION_PRIMARY), link, -1);
+                        gtk_clipboard_set_text (gtk_clipboard_get (GDK_SELECTION_CLIPBOARD), link, -1);
+                        g_free (link);
+                } else
+			ui_show_error_box (_("This item has no link specified!"));
 		item_unload (item);
 	} else {
 		liferea_shell_set_important_status_bar (_("No item has been selected"));
