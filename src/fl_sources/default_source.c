@@ -184,7 +184,8 @@ static struct nodeSourceType nst = {
 	                          NODE_SOURCE_CAPABILITY_ADD_FEED |
 	                          NODE_SOURCE_CAPABILITY_ADD_FOLDER |
 				  NODE_SOURCE_CAPABILITY_WRITABLE_FEEDLIST,
-	.subscriptionType	= NULL,
+	.feedSubscriptionType	= NULL,
+	.sourceSubscriptionType	= NULL,
 	.source_type_init	= default_source_init,
 	.source_type_deinit	= default_source_deinit,
 	.source_new		= NULL,
@@ -192,7 +193,6 @@ static struct nodeSourceType nst = {
 	.source_import		= default_source_import,
 	.source_export		= default_source_export,
 	.source_get_feedlist	= default_source_source_get_feedlist,
-	.source_update		= default_source_update,
 	.source_auto_update	= default_source_auto_update,
 	.free 			= NULL,
 	.add_subscription	= default_source_add_subscription,
@@ -204,7 +204,7 @@ static struct nodeSourceType nst = {
 nodeSourceTypePtr
 default_source_get_type (void)
 {
-	nst.subscriptionType = feed_get_subscription_type ();
+	nst.feedSubscriptionType = feed_get_subscription_type ();
 
 	return &nst;
 }

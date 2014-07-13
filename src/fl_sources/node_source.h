@@ -1,7 +1,7 @@
 /**
  * @file node_source.h  generic node source interface
  * 
- * Copyright (C) 2005-2013 Lars Windolf <lars.lindner@gmail.com>
+ * Copyright (C) 2005-2014 Lars Windolf <lars.lindner@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 #include "node.h"
 #include "node_type.h"
 #include "subscription_type.h"
+#include "fl_sources/google_reader_api.h"
 
 /* Liferea allows to have different sources in the feed list. These
    sources are called "node sources" henceforth. Node sources can 
@@ -57,8 +58,37 @@ enum {
 	NODE_SOURCE_CAPABILITY_ADD_FOLDER		= (1<<4),	/**< folders can be added to the source */
 	NODE_SOURCE_CAPABILITY_HIERARCHIC_FEEDLIST	= (1<<5),	/**< the feed list tree of the source can have hierarchic folders */
 	NODE_SOURCE_CAPABILITY_ITEM_STATE_SYNC		= (1<<6),	/**< the item state can and should be sync'ed with remote */
-	NODE_SOURCE_CAPABILITY_CONVERT_TO_LOCAL		= (1<<7)	/**< node sources of this type can be converted to internal subscription lists */
+	NODE_SOURCE_CAPABILITY_CONVERT_TO_LOCAL		= (1<<7),	/**< node sources of this type can be converted to internal subscription lists */
+	NODE_SOURCE_CAPABILITY_GOOGLE_READER_API	= (1<<8),	/**< node sources of this type are Google Reader clones */
 };
+
+/** Node source state model */
+enum { 
+	NODE_SOURCE_STATE_NONE = 0,		/**< no authentication tried so far */
+	NODE_SOURCE_STATE_IN_PROGRESS,		/**< authentication in progress */
+	NODE_SOURCE_STATE_ACTIVE,		/**< authentication succeeded */
+	NODE_SOURCE_STATE_NO_AUTH,		/**< authentication has failed */
+	NODE_SOURCE_STATE_MIGRATE,		/**< source will be migrated, do not do anything anymore! */
+};
+
+/** Node source subscription update flags */
+enum { 
+	/**
+	 * Update only the subscription list, and not each node underneath it.
+	 * Note: Uses higher 16 bits to avoid conflict.
+	 */
+	NODE_SOURCE_UPDATE_ONLY_LIST = (1<<16),
+	/**
+	 * Only login, do not do any updates. 
+	 */
+	NODE_SOURCE_UPDATE_ONLY_LOGIN = (1<<17)
+};
+
+/**
+ * Number of auth failures after which we stop bothering the user while
+ * auto-updating until he manually updates again.
+ */
+#define NODE_SOURCE_MAX_AUTH_FAILURES		3
 
 /** feed list node source type */
 typedef struct nodeSourceType {
@@ -66,8 +96,13 @@ typedef struct nodeSourceType {
 	const gchar	*name;		/**< a descriptive source name (for preferences and menus) */
 	const gchar	*description;	/**< more detailed source type description (up to some sentences) */
 	gulong		capabilities;	/**< bitmask of feed list source capabilities */
+	googleReaderApi	api;		/**< endpoint definitions for Google Reader like JSON API */
 
-	subscriptionTypePtr	subscriptionType;	/* the subscription type for all child nodes that are subscriptions */
+	/** The subscription type for all child nodes that are subscriptions */
+	subscriptionTypePtr	feedSubscriptionType;
+
+	/** The subscription type for the source itself (can be NULL) */
+	subscriptionTypePtr	sourceSubscriptionType;
 
 	/* source type loading and unloading methods */
 	void		(*source_type_init)(void);
@@ -110,12 +145,6 @@ typedef struct nodeSourceType {
 	 * caller.
 	 */
 	gchar *		(*source_get_feedlist)(nodePtr node);
-	
-	/**
-	 * This MANDATARY method is called to force the source to update
-	 * its subscriptions list and the child subscriptions themselves.
-	 */
-	void		(*source_update)(nodePtr node);
 	
 	/**
 	 * This MANDATARY method is called to request the source to update
@@ -190,6 +219,11 @@ typedef struct nodeSourceType {
 typedef struct nodeSource {
 	nodeSourceTypePtr	type;		/**< node source type of this source instance */
 	nodePtr			root;		/**< insertion node of this node source instance */
+	GQueue			*actionQueue;	/**< queue for async actions */
+	gint			loginState;	/**< The current login state */
+
+	gchar			*authToken;	/**< The authorization token */
+	gint			authFailures;	/**< Number of authentication failures */
 } *nodeSourcePtr;
 
 /** Use this to cast the node source type from a node structure. */
@@ -217,12 +251,25 @@ nodePtr node_source_setup_root (void);
 /**
  * Creates a new source and assigns it to the given new node. 
  * To be used to prepare a source node before adding it to the 
- * feed list.
+ * feed list. This method takes care of setting the proper source
+ * subscription type and setting up the subscription if url != NULL.
+ * The caller needs set additional auth info for the subscription.
  *
  * @param node			a newly created node
  * @param nodeSourceType	the node source type
+ * @param url			subscription URL
  */
-void node_source_new (nodePtr node, nodeSourceTypePtr nodeSourceType);
+void node_source_new (nodePtr node, nodeSourceTypePtr nodeSourceType, const gchar *url);
+
+/**
+ * Store any type of authentication token (e.g. a cookie or session id)
+ *
+ * FIXME: maybe drop this in favour of node metadata
+ *
+ * @param node			a node
+ * @param token			a string
+ */
+void node_source_set_auth_token (nodePtr node, gchar *token);
 
 /**
  * Force the source to update its subscription list and
@@ -268,6 +315,31 @@ void node_source_remove_node (nodePtr node, nodePtr child);
  * @returns a new node representing the new folder
  */
 nodePtr node_source_add_folder (nodePtr node, const gchar *title);
+
+/**
+ * Called to update a nodes folder. If current folder != given folder 
+ * the node will be reparented.
+ *
+ * @param node		any node
+ * @param folder	the target folder
+ */
+void node_source_update_folder (nodePtr node, nodePtr folder);
+
+/* 
+ * Find a folder by the name under parent or create it. 
+ * 
+ * If a node source doesn't provide ids the category display name should be 
+ * used as id. The worst thing happening then is to evenly named categories 
+ * being merged into one (which the user can easily workaround by renaming 
+ * on the remote side).
+ * 
+ * @param parent	Parent folder (or source root node)
+ * @param id		Folder/category id (or NULL)
+ * @param name		Folder display name
+ *
+ * @returns a valid nodePtr
+ */
+nodePtr node_source_find_or_create_folder (nodePtr parent, const gchar *id, const gchar *label);
 
 /**
  * Called when the read state of an item changes.

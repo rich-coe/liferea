@@ -73,9 +73,11 @@ dd {
 	padding-left: 30px;
 }
 
-img {
+div.content * img, video {
 	border:0;
 	margin:2px;
+	max-width:100%;
+	height:auto;
 }
 
 img.gravatar {
@@ -263,6 +265,7 @@ hr.summary {
 	border-bottom:1px solid black;
 	margin:0;
 	background:#ffa;
+	color:black;
 }
 
 #commentFeedError {

@@ -32,7 +32,6 @@
 #include "aol_source.h"
 #include "subscription.h"
 #include "node.h"
-#include "aol_source_edit.h"
 #include "metadata.h"
 #include "db.h"
 #include "item_state.h"
@@ -245,7 +244,7 @@ aol_feed_subscription_prepare_update_request (subscriptionPtr subscription,
 	AolSourcePtr source = (AolSourcePtr) node_source_root_from_node (subscription->node)->data; 
 	
 	g_assert(source); 
-	if (source->loginState == AOL_SOURCE_STATE_NONE) { 
+	if (source->root->source->loginState == NODE_SOURCE_STATE_NONE) { 
 		subscription_update (node_source_root_from_node (subscription->node)->subscription, 0) ;
 		return FALSE;
 	}
@@ -257,7 +256,7 @@ aol_feed_subscription_prepare_update_request (subscriptionPtr subscription,
 	g_free (newUrl);
 	g_free (source_escaped);
 
-	update_request_set_auth_value (request, source->authHeaderValue);
+	update_request_set_auth_value (request, subscription->node->source->authToken);
 	return TRUE;
 }
 

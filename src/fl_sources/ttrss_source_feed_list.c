@@ -45,7 +45,9 @@ ttrss_source_check_node_for_removal (nodePtr node, gpointer user_data)
 	gboolean	found = FALSE;
 
 	if (IS_FOLDER (node)) {
-		// FIXME: check folders too
+		/* Auto-remove folders if they do not have children */
+		if (!node->children)
+			feedlist_node_removed (node);
 
 		node_foreach_child_data (node, ttrss_source_check_node_for_removal, user_data);
 	} else {
@@ -66,65 +68,8 @@ ttrss_source_check_node_for_removal (nodePtr node, gpointer user_data)
 	}				
 }
 
-/* 
- * Find a node by the name under root or create it.
- * 
- * @param name		Folder display name
- * @param parent	Parent folder or source root node
- *
- * @returns a valid nodePtr
- */
-static nodePtr
-ttrss_source_find_or_create_folder (const gchar *name, nodePtr parent)
-{
-	nodePtr		folder = NULL;
-
-	folder = feedlist_find_node (parent, FOLDER_BY_TITLE, name);
-	if (!folder) {
-		folder = node_new (folder_get_node_type ());
-		node_set_title (folder, name);
-		node_set_parent (folder, parent, -1);
-		feedlist_node_imported (folder);
-		subscription_update (folder->subscription, FEED_REQ_RESET_TITLE | FEED_REQ_PRIORITY_HIGH);
-	}
-	
-	return folder;
-}
-
-/* 
- * Check if folder of a node changed in TinyTinyRSS and move
- * node to the correct folder.
- */
 static void
-ttrss_source_update_folder (ttrssSourcePtr source, nodePtr node)
-{
-	nodePtr		parent;
-	gint		category;
-	const gchar	*feedId;
-
-	feedId = (const gchar *)metadata_list_get (node->subscription->metadata, "ttrss-feed-id");
-	if (!feedId)
-		return;
-
-	category = GPOINTER_TO_INT (g_hash_table_lookup (source->categories, GINT_TO_POINTER (atoi (feedId))));
-	parent = g_hash_table_lookup (source->categoryToNode, GINT_TO_POINTER (category));
-	if (!parent)
-		return;
-
-	if (parent != node->parent) {
-		debug2 (DEBUG_UPDATE, "TinyTinyRSS Moving node \"%s\" to folder \"%s\"", node->title, parent->title);
-		node_reparent (node, parent);
-	}
-
-	/* if feed has no category and parent is not source root, reparent to source root */
-	if (parent == NULL && node->parent != source->root) {
-		debug1 (DEBUG_UPDATE, "TinyTinyRSS Moving node \"%s\" back to root", node->title);
-		node_reparent (node, source->root);
-	}
-}
-
-static void
-ttrss_source_merge_feed (ttrssSourcePtr source, const gchar *url, const gchar *title, gint64 id)
+ttrss_source_merge_feed (ttrssSourcePtr source, const gchar *url, const gchar *title, gint64 id, nodePtr folder)
 {
 	nodePtr		node;
 	gchar		*tmp;
@@ -139,14 +84,14 @@ ttrss_source_merge_feed (ttrssSourcePtr source, const gchar *url, const gchar *t
 		node_set_data (node, feed_new ());
 		
 		node_set_subscription (node, subscription_new (url, NULL, NULL));
-		node->subscription->type = &ttrssSourceFeedSubscriptionType;
+		node->subscription->type = source->root->source->type->feedSubscriptionType;
 	
 		/* Save tt-rss feed id which we need to fetch items... */
 		tmp = g_strdup_printf ("%" G_GINT64_FORMAT, id);
 		metadata_list_set (&node->subscription->metadata, "ttrss-feed-id", tmp);
 		g_free (tmp);
 	
-		node_set_parent (node, source->root, -1);
+		node_set_parent (node, folder?folder:source->root, -1);
 		feedlist_node_imported (node);
 		
 		/**
@@ -159,10 +104,9 @@ ttrss_source_merge_feed (ttrssSourcePtr source, const gchar *url, const gchar *t
 	
 		/* Important: we must not loose the feed id! */
 		db_subscription_update (node->subscription);
+	} else {
+		node_source_update_folder (node, folder);
 	}
-	
-	debug2 (DEBUG_UPDATE, "updating folder for %s (%s)", title, url);
-	ttrss_source_update_folder (source, node);
 }
 
 /* source subscription type implementation */
@@ -174,6 +118,8 @@ ttrss_source_subscription_list_cb (const struct updateResult * const result, gpo
 	ttrssSourcePtr source = (ttrssSourcePtr) subscription->node->data;
 
 	debug1 (DEBUG_UPDATE,"ttrss_subscription_cb(): %s", result->data);
+
+	subscription->updateJob = NULL;
 	
 	if (result->data && result->httpstatus == 200) {
 		JsonParser	*parser = json_parser_new ();
@@ -219,13 +165,20 @@ ttrss_source_subscription_list_cb (const struct updateResult * const result, gpo
 			/* Add all new nodes we find */
 			while (iter) {
 				JsonNode *node = (JsonNode *)iter->data;
+
+				/* Get category id */
+				gchar *category = NULL;
+				gint cat_id = json_get_int (node, "cat_id");
+				if (cat_id > 0)
+					category = g_strdup_printf ("%d", cat_id);
 				
 				/* ignore everything without a feed url */
 				if (json_get_string (node, "feed_url")) {
 					ttrss_source_merge_feed (source, 
 					                         json_get_string (node, "feed_url"),
 					                         json_get_string (node, "title"),
-					                         json_get_int (node, "id"));
+					                         json_get_int (node, "id"),
+								 node_source_find_or_create_folder (source->root, category, NULL));
 				}
 				iter = g_list_next (iter);
 			}
@@ -248,7 +201,7 @@ ttrss_source_subscription_list_cb (const struct updateResult * const result, gpo
 		debug0 (DEBUG_UPDATE, "ttrss_subscription_cb(): ERROR: failed to get TinyTinyRSS subscription list!");
 	}
 
-	if (!(flags & TTRSS_SOURCE_UPDATE_ONLY_LIST))
+	if (!(flags & NODE_SOURCE_UPDATE_ONLY_LIST))
 		node_foreach_child_data (subscription->node, node_update_subscription, GUINT_TO_POINTER (0));	
 }
 
@@ -285,17 +238,17 @@ ttrss_source_merge_categories (ttrssSourcePtr source, nodePtr parent, gint paren
 			const gchar *type = json_get_string (node, "type");
 			const gchar *name = json_get_string (node, "name");
 
-			/* ignore everything without a name */	
-			if (json_get_string (node, "name")) {
+			/* ignore everything without a name or bare_id */	
+			if (name) {
 
 				/* Process child categories */
 				if (type && g_str_equal (type, "category")) {
 					nodePtr folder;
+					gchar *folderId = g_strdup_printf ("%d", id);
 
 					debug2 (DEBUG_UPDATE, "TinyTinyRSS category id=%ld name=%s", id, name);
-					folder = ttrss_source_find_or_create_folder (name, parent);
-					g_hash_table_insert (source->categoryToNode, GINT_TO_POINTER (id), folder);
-					g_hash_table_insert (source->nodeToCategory, folder, GINT_TO_POINTER (id));
+					folder = node_source_find_or_create_folder (parent, folderId, name);
+					g_free (folderId);
 
 					/* Process child categories ... */
 					if (json_get_node (node, "items"))
@@ -381,7 +334,6 @@ ttrss_subscription_process_update_result (subscriptionPtr subscription, const st
 
 			/* Process categories tree recursively */
 			g_hash_table_remove_all (source->categories);
-			g_hash_table_insert (source->categoryToNode, GINT_TO_POINTER (0), source->root);
 			ttrss_source_merge_categories (source, source->root, 0, items);
 
 			/* And trigger the actual feed fetching */
@@ -400,18 +352,19 @@ ttrss_subscription_process_update_result (subscriptionPtr subscription, const st
 static gboolean
 ttrss_subscription_prepare_update_request (subscriptionPtr subscription, struct updateRequest *request)
 {
+	nodePtr node = subscription->node;
 	ttrssSourcePtr	source = (ttrssSourcePtr) subscription->node->data;
 	gchar *source_uri;
 
 	debug0 (DEBUG_UPDATE, "ttrss_subscription_prepare_update_request");
 
-	g_assert (source);
-	if (source->loginState == TTRSS_SOURCE_STATE_NONE) {
+	g_assert (node->source);
+	if (node->source->loginState == NODE_SOURCE_STATE_NONE) {
 		debug0 (DEBUG_UPDATE, "TinyTinyRSS login");
 		ttrss_source_login (source, 0);
 		return FALSE;
 	}
-	debug1 (DEBUG_UPDATE, "TinyTinyRSS updating subscription (node id %s)", subscription->node->id);
+	debug1 (DEBUG_UPDATE, "TinyTinyRSS updating subscription (node id %s)", node->id);
 
 	/* Updating the TinyTinyRSS subscription means updating the list
 	   of categories and the list of feeds in 2 requests and if the

@@ -157,7 +157,7 @@ liferea_shell_class_init (LifereaShellClass *klass)
 
 	/* LifereaShell:item-list: */
 	g_object_class_install_property (object_class,
-		                         PROP_FEED_LIST,
+		                         PROP_ITEM_LIST,
 		                         g_param_spec_object ("item-list",
 		                                              "LifereaItemList",
 		                                              "LifereaItemList object",
@@ -166,7 +166,7 @@ liferea_shell_class_init (LifereaShellClass *klass)
 
 	/* LifereaShell:item-view: */
 	g_object_class_install_property (object_class,
-		                         PROP_FEED_LIST,
+		                         PROP_ITEM_VIEW,
 		                         g_param_spec_object ("item-view",
 		                                              "LifereaItemView",
 		                                              "LifereaItemView object",
@@ -175,7 +175,7 @@ liferea_shell_class_init (LifereaShellClass *klass)
 
 	/* LifereaShell:browser-tabs: */
 	g_object_class_install_property (object_class,
-		                         PROP_FEED_LIST,
+		                         PROP_BROWSER_TABS,
 		                         g_param_spec_object ("browser-tabs",
 		                                              "LifereaBrowserTabs",
 		                                              "LifereaBrowserTabs object",
@@ -1387,14 +1387,15 @@ liferea_shell_create (GtkApplication *app, const gchar *overrideWindowState)
 		g_free (id);
 
 		// FIXME: Move to item list view code
-		gint item_id;
+		// FIXME: Deactivated due to races causing crashes (see SF #1142, #1137)
+		/*gint item_id;
 		if (conf_get_int_value (LAST_ITEM_SELECTED, &item_id)) {
 			itemPtr item = db_item_load ((gulong)item_id);
 			if (item) {
 				itemview_select_item (item);
 				item_unload (item);
 			}
-		}
+		}*/
 	}
 		
 	/* 12. Connect network monitoring and set icon*/
