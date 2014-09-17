@@ -103,6 +103,7 @@ itemset_generic_merge_check (GList *items, itemPtr newItem, gint maxChecks, gboo
 
 		/* just for the case there are no ids: compare titles and HTML descriptions */
 		equal = TRUE;
+                reason = 0;
 
 		if (((item_get_title (oldItem) != NULL) && (item_get_title (newItem) != NULL)) && 
 		     (0 != strcmp (item_get_title (oldItem), item_get_title (newItem)))) {
@@ -123,11 +124,11 @@ itemset_generic_merge_check (GList *items, itemPtr newItem, gint maxChecks, gboo
 
 				if (allowStateChanges) {
 					/* found corresponding item, check if they are REALLY equal (eg, read status may have changed) */
-					if(oldItem->readStatus != newItem->readStatus) {
+					if(0 && oldItem->readStatus != newItem->readStatus) {
 						equal = FALSE;
 						reason |= 4;
 					}
-					if(oldItem->flagStatus != newItem->flagStatus) {
+					if(0 && oldItem->flagStatus != newItem->flagStatus) {
 						equal = FALSE;
 						reason |= 8;
 					}
