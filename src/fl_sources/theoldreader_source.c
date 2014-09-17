@@ -1,7 +1,7 @@
 /**
  * @file theoldreader_source.c  TheOldReader feed list source support
  * 
- * Copyright (C) 2007-2014 Lars Windolf <lars.lindner@gmail.com>
+ * Copyright (C) 2007-2014 Lars Windolf <lars.windolf@gmx.de>
  * Copyright (C) 2008 Arnold Noronha <arnstein87@gmail.com>
  * Copyright (C) 2011 Peter Oliver
  * Copyright (C) 2011 Sergey Snitsaruk <narren96c@gmail.com>
@@ -51,6 +51,7 @@ theoldreader_source_new (nodePtr node)
 	TheOldReaderSourcePtr source = g_new0 (struct TheOldReaderSource, 1) ;
 	source->root = node; 
 	source->lastTimestampMap = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
+	source->folderToCategory = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
 	
 	return source;
 }
@@ -64,6 +65,7 @@ theoldreader_source_free (TheOldReaderSourcePtr source)
 	update_job_cancel_by_owner (source);
 	
 	g_hash_table_unref (source->lastTimestampMap);
+	g_hash_table_destroy (source->folderToCategory);
 	g_free (source);
 }
 
@@ -98,7 +100,7 @@ theoldreader_source_login_cb (const struct updateResult * const result, gpointer
 		subscription->node->available = FALSE;
 
 		g_free (subscription->updateError);
-		subscription->updateError = g_strdup (_("TheOldReader login failed!"));
+		subscription->updateError = g_strdup (_("Login failed!"));
 		node_source_set_state (node, NODE_SOURCE_STATE_NO_AUTH);
 		
 		auth_dialog_new (subscription, flags);
@@ -200,8 +202,21 @@ theoldreader_source_import (nodePtr node)
 static nodePtr
 theoldreader_source_add_subscription (nodePtr root, subscriptionPtr subscription) 
 {
-	// FIXME: determine correct category from parent folder name
+	nodePtr			parent;
+	gchar			*categoryId = NULL;
+	TheOldReaderSourcePtr	source = (TheOldReaderSourcePtr)root->data;
+
+	/* Determine correct category from selected folder name */
+	parent = feedlist_get_selected ();
+	if (parent) {
+		if (parent->subscription)
+			parent = parent->parent;
+		categoryId = g_hash_table_lookup (source->folderToCategory, parent->id);
+	}
+
 	google_reader_api_edit_add_subscription (root->source, subscription->source);
+
+	// FIXME: API edit to add category tag!
 
 	// FIXME: leaking subscription?
 
@@ -310,8 +325,8 @@ extern struct subscriptionType theOldReaderSourceOpmlSubscriptionType;
 static struct nodeSourceType nst = {
 	.id                  = "fl_theoldreader",
 	.name                = N_("TheOldReader"),
-	.description         = N_("TheOldReader is a free online aggregator (http://theoldreader.com)."),
 	.capabilities        = NODE_SOURCE_CAPABILITY_DYNAMIC_CREATION | 
+	                       NODE_SOURCE_CAPABILITY_CAN_LOGIN |
 	                       NODE_SOURCE_CAPABILITY_WRITABLE_FEEDLIST |
 	                       NODE_SOURCE_CAPABILITY_ADD_FEED |
 	                       NODE_SOURCE_CAPABILITY_ITEM_STATE_SYNC |

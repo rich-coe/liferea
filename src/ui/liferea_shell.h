@@ -2,7 +2,7 @@
  * @file liferea_shell.h  UI layout handling
  *
  * Copyright (C) 2004-2005 Nathan J. Conrad <t98502@users.sourceforge.net>
- * Copyright (C) 2007-2013 Lars Windolf <lars.lindner@gmail.com>
+ * Copyright (C) 2007-2013 Lars Windolf <lars.windolf@gmx.de>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -181,15 +181,6 @@ void liferea_shell_update_allitems_actions (gboolean isNotEmpty, gboolean isRead
  * TODO: use signal instead
  */
 void liferea_shell_update_update_menu (gboolean enabled);
-
-/**
- * liferea_shell_update_unread_stats:
- *
- * Updates the unread/new item count right beneath the status bar.
- *
- * TODO: use signal instead
- */
-void liferea_shell_update_unread_stats (void);
 
 /**
  * liferea_shell_set_status_bar:

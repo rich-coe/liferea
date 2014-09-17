@@ -1,7 +1,7 @@
 /**
  * @file net.c  HTTP network access using libsoup
  *
- * Copyright (C) 2007-2014 Lars Windolf <lars.lindner@gmail.com>
+ * Copyright (C) 2007-2014 Lars Windolf <lars.windolf@gmx.de>
  * Copyright (C) 2009 Emilio Pozuelo Monfort <pochu27@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -31,7 +31,7 @@
 #include "common.h"
 #include "debug.h"
 
-#define HOMEPAGE	"http://liferea.sf.net/"
+#define HOMEPAGE	"http://lzone.de/liferea/"
 
 static SoupSession *session = NULL;
 
@@ -160,6 +160,9 @@ network_process_request (const updateJobPtr const job)
 					    update_state_get_etag (job->request->updateState));
 	}
 
+	/* Support HTTP content negotiation */
+	soup_message_headers_append(msg->request_headers, "Accept", "application/atom+xml,application/xml;q=0.9,text/xml;q=0.8,*/*;q=0.7");
+
 	/* Set the authentication */
 	if (!job->request->authValue &&
 	    job->request->options &&
@@ -224,10 +227,10 @@ network_init (void)
 
 	/* Set an appropriate user agent */
 	if (g_getenv ("LANG")) {
-		/* e.g. "Liferea/1.10.0 (Linux; de_DE; http://liferea.sf.net/) AppleWebKit (KHTML, like Gecko)" */
+		/* e.g. "Liferea/1.10.0 (Linux; de_DE; http://lzone.de/liferea/) AppleWebKit (KHTML, like Gecko)" */
 		useragent = g_strdup_printf ("Liferea/%s (%s; %s; %s) AppleWebKit (KHTML, like Gecko)", VERSION, OSNAME, g_getenv ("LANG"), HOMEPAGE);
 	} else {
-		/* e.g. "Liferea/1.10.0 (Linux; http://liferea.sf.net/) AppleWebKit (KHTML, like Gecko)" */
+		/* e.g. "Liferea/1.10.0 (Linux; http://lzone.de/liferea/) AppleWebKit (KHTML, like Gecko)" */
 		useragent = g_strdup_printf ("Liferea/%s (%s; %s) AppleWebKit (KHTML, like Gecko)", VERSION, OSNAME, HOMEPAGE);
 	}
 

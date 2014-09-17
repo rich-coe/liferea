@@ -2,7 +2,7 @@
  * @file feed_list_node.c  Handling feed list nodes
  * 
  * Copyright (C) 2004-2006 Nathan J. Conrad <t98502@users.sourceforge.net>
- * Copyright (C) 2004-2013 Lars Windolf <lars.lindner@gmail.com>
+ * Copyright (C) 2004-2013 Lars Windolf <lars.windolf@gmx.de>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -319,7 +319,7 @@ feed_list_node_update (const gchar *nodeId)
 	if (node->unreadCount == 0 && (labeltype & NODE_CAPABILITY_SHOW_UNREAD_COUNT))
 		labeltype -= NODE_CAPABILITY_SHOW_UNREAD_COUNT;
 
-	label = g_strdup (node_get_title (node));
+	label = g_markup_escape_text (node_get_title (node), -1);
 	switch (labeltype) {
 		case NODE_CAPABILITY_SHOW_UNREAD_COUNT |
 		     NODE_CAPABILITY_SHOW_ITEM_COUNT:
@@ -418,8 +418,8 @@ feed_list_node_remove (nodePtr node)
 	                                 GTK_BUTTONS_NONE,
 	                                 "%s", text);
 	gtk_dialog_add_buttons (GTK_DIALOG (dialog),
-	                        GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-	                        GTK_STOCK_DELETE, GTK_RESPONSE_ACCEPT,
+	                        "_Cancel", GTK_RESPONSE_CANCEL,
+	                        "_Delete", GTK_RESPONSE_ACCEPT,
 	                        NULL);
 	gtk_window_set_title (GTK_WINDOW (dialog), _("Deletion Confirmation"));
 	gtk_window_set_modal (GTK_WINDOW (dialog), TRUE);

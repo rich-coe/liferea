@@ -1,7 +1,7 @@
 /**
  * @file liferea_htmlview.c  Liferea embedded HTML rendering
  *
- * Copyright (C) 2003-2012 Lars Windolf <lars.lindner@gmail.com>
+ * Copyright (C) 2003-2012 Lars Windolf <lars.windolf@gmx.de>
  * Copyright (C) 2005-2006 Nathan J. Conrad <t98502@users.sourceforge.net> 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -648,7 +648,7 @@ liferea_htmlview_prepare_context_menu (LifereaHtmlView *htmlview, GtkMenu *menu,
 	
 	if(!link && !image) {
 		GtkWidget *item;
-		item = menu_add_option (menu, NULL, GTK_STOCK_COPY, G_CALLBACK (on_popup_copy_activate), htmlview);
+		item = menu_add_option (menu, _("_Copy"), NULL, G_CALLBACK (on_popup_copy_activate), htmlview);
 		if (!(RENDERER (htmlview)->hasSelection) (htmlview->priv->renderWidget)) 
 			gtk_widget_set_sensitive (item, FALSE);
 

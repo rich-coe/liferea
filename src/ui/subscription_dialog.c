@@ -1,7 +1,7 @@
 /**
  * @file subscription_dialog.c  property dialog for feed subscriptions
  *
- * Copyright (C) 2004-2011 Lars Windolf <lars.lindner@gmail.com>
+ * Copyright (C) 2004-2011 Lars Windolf <lars.windolf@gmx.de>
  * Copyright (C) 2004-2006 Nathan J. Conrad <t98502@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -348,7 +348,7 @@ on_selectfile_pressed (GtkButton *button,
 	}
 	
 	name = g_filename_from_utf8 (utfname, -1, NULL, NULL, NULL);
-	ui_choose_file (_("Choose File"), GTK_STOCK_OPEN, FALSE, on_selectfileok_clicked, name, NULL, NULL, NULL, ui_data);
+	ui_choose_file (_("Choose File"), _("_Open"), FALSE, on_selectfileok_clicked, name, NULL, NULL, NULL, ui_data);
 	g_free (name);
 }
  

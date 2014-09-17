@@ -1,7 +1,7 @@
 /**
  * @file theoldreader_source_feed_list.c  TheOldReader feed list handling
  * 
- * Copyright (C) 2013-2014  Lars Windolf <lars.lindner@gmail.com>
+ * Copyright (C) 2013-2014  Lars Windolf <lars.windolf@gmx.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -151,6 +151,10 @@ theoldreader_subscription_cb (subscriptionPtr subscription, const struct updateR
 						const gchar *label = json_get_string ((JsonNode *)citer->data, "label");
 						if (label) {
 							folder = node_source_find_or_create_folder (source->root, label, label);
+
+							/* Store category id also for folder (needed when subscribing new feeds) */
+							g_hash_table_insert (source->folderToCategory, g_strdup (folder->id), g_strdup (label));
+
 							break;
 						}
 						citer = g_list_next (citer);

@@ -1,7 +1,7 @@
 /**
  * @file node.c  hierarchic feed list node handling
  * 
- * Copyright (C) 2003-2013 Lars Windolf <lars.lindner@gmail.com>
+ * Copyright (C) 2003-2013 Lars Windolf <lars.windolf@gmx.de>
  * Copyright (C) 2004-2006 Nathan J. Conrad <t98502@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -120,7 +120,7 @@ node_set_subscription (nodePtr node, subscriptionPtr subscription)
 	
 	/* Besides the favicon age we have no persistent 
 	   update state field, so everything else goes NULL */
-	if (node->iconFile) {
+	if (node->iconFile && !strstr(node->iconFile, "default.png")) {
 		subscription->updateState->lastFaviconPoll.tv_sec = common_get_mod_time (node->iconFile);
 		debug2 (DEBUG_UPDATE, "Setting last favicon poll time for %s to %lu", node->id, subscription->updateState->lastFaviconPoll.tv_sec);
 	}
@@ -225,7 +225,7 @@ node_update_parent_counters (nodePtr node)
 	
 	if (old != node->unreadCount) {
 		feed_list_node_update (node->id);
-		liferea_shell_update_unread_stats ();
+		feedlist_new_items (0);	/* add 0 new items, as 'new-items' signal updates unread items also */
 	}
 	
 	if (node->parent)

@@ -1,7 +1,7 @@
 /**
  * @file ttrss_source_feed_list.c  tt-rss feed list handling routines.
  * 
- * Copyright (C) 2010-2014  Lars Windolf <lars.lindner@gmail.com>
+ * Copyright (C) 2010-2014  Lars Windolf <lars.windolf@gmx.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -251,8 +251,13 @@ ttrss_source_merge_categories (ttrssSourcePtr source, nodePtr parent, gint paren
 					g_free (folderId);
 
 					/* Process child categories ... */
-					if (json_get_node (node, "items"))
+					if (json_get_node (node, "items")) {
+						/* Store category id also for folder (needed when subscribing new feeds) */
+						g_hash_table_insert (source->folderToCategory, g_strdup (folder->id), GINT_TO_POINTER (id));
+
+						/* Recurse... */
 						ttrss_source_merge_categories (source, folder, id, json_get_node (node, "items"));
+					}
 				/* Process child feeds */
 				} else {	
 					debug3 (DEBUG_UPDATE, "TinyTinyRSS feed=%s folder=%d (%ld)", name, parentId, id);

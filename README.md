@@ -7,12 +7,7 @@ git master status:
 Introduction
 ------------
 
-Liferea is an abbreviation for Linux Feed Reader. It is a news aggregator for 
-online news feeds. It supports a number of different feed formats including 
-RSS/RDF, CDF and Atom. There are many other news readers available, but these 
-others are not available for Linux or require many extra libraries to be 
-installed. Liferea tries to fill this gap by creating a fast, easy to use, 
-easy to install news aggregator for GTK/GNOME.
+Liferea is a web feed reader/news aggregator that brings together all of the content from your favorite subscriptions into a simple interface that makes it easy to organize and browse feeds. Its GUI is similar to a desktop mail/newsclient, with an embedded graphical browser.
 
 ![screenshot](http://lzone.de/liferea/screenshots/screenshot3.png)
 
@@ -22,9 +17,7 @@ Installation from Package
 -------------------------
 
 Detailed instructions on how to install Liferea on the different distributions can 
-be found online on our homepage at
-
-	http://lzone.de/liferea/install.htm
+be found online on our homepage at http://lzone.de/liferea/install.htm
 
 
 
@@ -72,13 +65,13 @@ a package named like the library and one with a suffix "-dev" or
 _Compiling from Tarball_
 
 If you do not like version control systems you might want to compile
-Liferea from a release tarball. Those are supplied at our SourceForge
-project homepage (http://lzone.de/liferea). After you downloaded it 
-extract it like this:
+Liferea from a release tarball. Those are supplied in the Github release
+tracker (https://github.com/lwindolf/liferea/releases). After you download a 
+release extract it like this:
 
     tar jxvf liferea-1.11.0.tar.bz2 
  
-After unpacking run the standard autotools commands:
+After extracting run the standard autotools commands:
 
     ./configure
     make
@@ -283,7 +276,7 @@ Now there are three major support channels:
 + The mailing list. Good for posting compilation problems and starting longer 
   discussions.
     
-+ The SourceForge bug tracker (http://sf.net/projects/liferea) where you
++ The GitHub bug tracker (https://github.com/lwindolf/liferea/issues) where you
   can post bug reports for all problems you find. Ensure to look for any
   existing reports on your problem!
 

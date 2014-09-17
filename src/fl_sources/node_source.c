@@ -1,7 +1,7 @@
 /**
  * @file node_source.c  generic node source provider implementation
  * 
- * Copyright (C) 2005-2014 Lars Windolf <lars.lindner@gmail.com>
+ * Copyright (C) 2005-2014 Lars Windolf <lars.windolf@gmx.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -395,9 +395,24 @@ node_source_auto_update (nodePtr node)
 	NODE_SOURCE_TYPE (node)->source_auto_update (node);
 }
 
+static gboolean
+node_source_is_logged_in (nodePtr node)
+{
+	if (FALSE == (NODE_SOURCE_TYPE (node)->capabilities & NODE_SOURCE_CAPABILITY_CAN_LOGIN))
+		return TRUE;
+
+	if (node->source->loginState != NODE_SOURCE_STATE_ACTIVE)
+		ui_show_error_box (_("Login for '%s' has not yet completed! Please wait until login is done."), node->title);
+
+	return node->source->loginState == NODE_SOURCE_STATE_ACTIVE;
+}
+
 nodePtr
 node_source_add_subscription (nodePtr node, subscriptionPtr subscription)
 {
+	if (!node_source_is_logged_in (node))
+		return NULL;
+
 	if (NODE_SOURCE_TYPE (node)->add_subscription)
 		return NODE_SOURCE_TYPE (node)->add_subscription (node, subscription);
 	else
@@ -409,6 +424,9 @@ node_source_add_subscription (nodePtr node, subscriptionPtr subscription)
 nodePtr
 node_source_add_folder (nodePtr node, const gchar *title)
 {
+	if (!node_source_is_logged_in (node))
+		return NULL;
+
 	if (NODE_SOURCE_TYPE (node)->add_folder)
 		return NODE_SOURCE_TYPE (node)->add_folder (node, title);
 	else
@@ -420,6 +438,9 @@ node_source_add_folder (nodePtr node, const gchar *title)
 void
 node_source_update_folder (nodePtr node, nodePtr folder)
 {
+	if (!node_source_is_logged_in (node))
+		return;
+
 	if (!folder)
 		folder = node->source->root;
 
@@ -455,6 +476,9 @@ node_source_find_or_create_folder (nodePtr parent, const gchar *id, const gchar 
 void
 node_source_remove_node (nodePtr node, nodePtr child)
 {
+	if (!node_source_is_logged_in (node))
+		return;
+
 	g_assert (child != node);
 	g_assert (child != child->source->root);
 	
@@ -552,6 +576,9 @@ node_source_convert_to_local (nodePtr node)
 static void
 node_source_remove (nodePtr node)
 {
+	if (!node_source_is_logged_in (node))
+		return;
+
 	g_assert (node == node->source->root);
 	
 	if (NULL != NODE_SOURCE_TYPE (node)->source_delete)

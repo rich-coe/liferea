@@ -1,7 +1,7 @@
 /**
  * @file node_source.h  generic node source interface
  * 
- * Copyright (C) 2005-2014 Lars Windolf <lars.lindner@gmail.com>
+ * Copyright (C) 2005-2014 Lars Windolf <lars.windolf@gmx.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,6 +60,7 @@ enum {
 	NODE_SOURCE_CAPABILITY_ITEM_STATE_SYNC		= (1<<6),	/**< the item state can and should be sync'ed with remote */
 	NODE_SOURCE_CAPABILITY_CONVERT_TO_LOCAL		= (1<<7),	/**< node sources of this type can be converted to internal subscription lists */
 	NODE_SOURCE_CAPABILITY_GOOGLE_READER_API	= (1<<8),	/**< node sources of this type are Google Reader clones */
+	NODE_SOURCE_CAPABILITY_CAN_LOGIN		= (1<<9)	/**< node source needs login (means loginState member is to be used) */
 };
 
 /** Node source state model */
@@ -94,7 +95,6 @@ enum {
 typedef struct nodeSourceType {
 	const gchar	*id;		/**< a unique feed list source type identifier */
 	const gchar	*name;		/**< a descriptive source name (for preferences and menus) */
-	const gchar	*description;	/**< more detailed source type description (up to some sentences) */
 	gulong		capabilities;	/**< bitmask of feed list source capabilities */
 	googleReaderApi	api;		/**< endpoint definitions for Google Reader like JSON API */
 

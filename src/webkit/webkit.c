@@ -1,7 +1,7 @@
 /**
  * @file webkit.c  WebKit browser module for Liferea
  *
- * Copyright (C) 2007-2010 Lars Windolf <lars.lindner@gmail.com>
+ * Copyright (C) 2007-2010 Lars Windolf <lars.windolf@gmx.de>
  * Copyright (C) 2008 Lars Strojny <lars@strojny.net>
  * Copyright (C) 2009-2012 Emilio Pozuelo Monfort <pochu27@gmail.com>
  * Copyright (C) 2009 Adrian Bunk <bunk@users.sourceforge.net>
@@ -325,12 +325,19 @@ static WebKitWebView*
 webkit_create_web_view (WebKitWebView *view, WebKitWebFrame *frame)
 {
 	LifereaHtmlView *htmlview;
-	GtkWidget	*scrollpane;
+	GtkWidget	*container;
 	GtkWidget	*htmlwidget;
+	GList 		*children;
 
 	htmlview = browser_tabs_add_new (NULL, NULL, TRUE);
-	scrollpane = liferea_htmlview_get_widget (htmlview);
-	htmlwidget = gtk_bin_get_child (GTK_BIN (scrollpane));
+	container = liferea_htmlview_get_widget (htmlview);
+
+	/* Ugly lookup of the webview. LifereaHtmlView uses a GtkBox
+	   with first a URL bar (sometimes invisble) and the HTML renderer
+	   as 2nd child */
+	children = gtk_container_get_children (GTK_CONTAINER (container));
+	htmlwidget = gtk_bin_get_child (GTK_BIN (children->next->data));
+
 	return WEBKIT_WEB_VIEW (htmlwidget);
 }
 
