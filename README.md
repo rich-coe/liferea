@@ -1,3 +1,14 @@
+Fork
+----
+This is a fork of liferea for my enhancements.
+
+17 Sep 2014
+- do not add existing item as new if the feed does not provide a timestamp  (src/itemset.c)
+- preform null check before use  (src/ui/item_list_view.c)
+- save feed parse error before trying auto discover; restore error if auto fails (src/feed_parser.c)
+
+
+
 This documentation was last updated for Liferea version 1.11 (02.06.2014).
 
 git master status: 
