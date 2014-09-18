@@ -187,7 +187,8 @@ itemlist_check_for_deferred_action (void)
 		if(itemlist->priv->deferredFilter) {
 			itemlist->priv->deferredFilter = FALSE;
 			item = item_load(id);
-			itemview_remove_item(item);
+                        item->isHidden = TRUE;
+                        itemview_update_item (item);
 			feed_list_node_update(item->nodeId);
 		}
 
@@ -438,8 +439,7 @@ itemlist_hide_item (itemPtr item)
 		feed_list_node_update (item->nodeId);
 	} else {
 		itemlist->priv->deferredFilter = TRUE;
-		/* update the item to show new state that forces
-		   later removal */
+		/* update the item to show new state that forces later removal */
 		itemview_update_item (item);
 	}
 }
@@ -449,6 +449,7 @@ static void
 itemlist_unhide_item (itemPtr item)
 {
 	itemlist->priv->deferredFilter = FALSE;
+        item->isHidden = FALSE;
 }
 
 /* functions to remove items on remove requests */

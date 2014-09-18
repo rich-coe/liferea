@@ -432,6 +432,7 @@ item_list_view_update_item (ItemListView *ilv, itemPtr item)
 	GtkTreeIter	iter;
 	gchar		*title, *time_str;
 	const GdkPixbuf	*state_icon;
+        int fontWeight = PANGO_WEIGHT_BOLD;
 	
 	if (!item_list_view_id_to_iter (ilv, item->id, &iter))
 		return;
@@ -445,6 +446,9 @@ item_list_view_update_item (ItemListView *ilv, itemPtr item)
 	             !item->readStatus ? icon_get (ICON_UNREAD) :
 		     NULL;
 
+        if (item->readStatus)
+            fontWeight = item->isHidden ? PANGO_WEIGHT_ULTRALIGHT : PANGO_WEIGHT_NORMAL;
+
 	if (ilv->priv->batch_mode)
 		itemstore = ilv->priv->batch_itemstore;
 	else
@@ -454,7 +458,7 @@ item_list_view_update_item (ItemListView *ilv, itemPtr item)
 		            IS_LABEL, title,
 			    IS_TIME_STR, time_str,
 			    IS_STATEICON, state_icon,
-			    ITEMSTORE_UNREAD, item->readStatus ? PANGO_WEIGHT_NORMAL : PANGO_WEIGHT_BOLD,
+			    ITEMSTORE_UNREAD, fontWeight,
 			    ITEMSTORE_ALIGN, item_list_title_alignment (title),
 			    -1);
 
