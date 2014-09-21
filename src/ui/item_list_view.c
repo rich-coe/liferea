@@ -490,9 +490,6 @@ item_list_view_update_all_items (ItemListView *ilv)
 void
 item_list_view_update (ItemListView *ilv, gboolean hasEnclosures)
 {
-	/* we depend on the fact that the third column is the enclosure icon column!!! */
-	gtk_tree_view_column_set_visible (gtk_tree_view_get_column (ilv->priv->treeview, 1), hasEnclosures);
-
 	if (ilv->priv->batch_mode) {
 		item_list_view_set_tree_store (ilv, ilv->priv->batch_itemstore);
 		ilv->priv->batch_mode = FALSE;
@@ -802,7 +799,7 @@ item_list_view_enable_favicon_column (ItemListView *ilv, gboolean enabled)
 	/* we depend on the fact that the second column is the favicon column!!! 
 	   if we are in search mode or have a folder or vfolder we show the favicon 
 	   column to give a hint where the item comes from ... */
-	gtk_tree_view_column_set_visible (gtk_tree_view_get_column (ilv->priv->treeview, 3), enabled);
+	gtk_tree_view_column_set_visible (gtk_tree_view_get_column (ilv->priv->treeview, 2), enabled);
 }
 
 void
