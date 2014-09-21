@@ -60,6 +60,7 @@ typedef struct item {
 	GSList		*metadata;		/**< Metadata of this item */
 	GHashTable	*tmpdata;		/**< Temporary data hash used during stateful parsing */
 	time_t		time;			/**< Last modified date of the headline */
+        gchar           *timestr;               /**< Last modified data as a string */
 
 	gchar		*commentFeedId;		/**< Id of the comment feed of this item (or NULL if there is no comment feed) */
 	

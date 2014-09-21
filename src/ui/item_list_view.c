@@ -233,6 +233,7 @@ item_list_view_set_sort_column (ItemListView *ilv, nodeViewSortType sortType, gb
 {
 	gint sortColumn;
 	
+#ifdef notdef
 	switch (sortType) {
 		case NODE_VIEW_SORT_BY_TITLE:
 			sortColumn = IS_LABEL;
@@ -248,10 +249,10 @@ item_list_view_set_sort_column (ItemListView *ilv, nodeViewSortType sortType, gb
 			sortColumn = IS_TIME;
 			break;
 	}
+#endif
 	
 	gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (gtk_tree_view_get_model (ilv->priv->treeview)),
-	                                      sortColumn, 
-	                                      sortReversed?GTK_SORT_DESCENDING:GTK_SORT_ASCENDING);
+	                                      IS_TIME, GTK_SORT_ASCENDING);
 }
 
 /**
@@ -345,7 +346,6 @@ item_list_view_set_tree_store (ItemListView *ilv, GtkTreeStore *itemstore)
 		g_object_unref (model);
 	
 	gtk_tree_sortable_set_sort_func (GTK_TREE_SORTABLE (itemstore), IS_TIME, item_list_view_date_sort_func, NULL, NULL);
-	gtk_tree_sortable_set_sort_func (GTK_TREE_SORTABLE (itemstore), IS_SOURCE, item_list_view_favicon_sort_func, NULL, NULL);
 	g_signal_connect (G_OBJECT (itemstore), "sort-column-changed", G_CALLBACK (itemlist_sort_column_changed_cb), NULL);
 	
 	gtk_tree_view_set_model (ilv->priv->treeview, GTK_TREE_MODEL (itemstore));
@@ -353,8 +353,7 @@ item_list_view_set_tree_store (ItemListView *ilv, GtkTreeStore *itemstore)
 	/* Setup the selection handler */
 	select = gtk_tree_view_get_selection (ilv->priv->treeview);
 	gtk_tree_selection_set_mode (select, GTK_SELECTION_SINGLE);
-	g_signal_connect (G_OBJECT (select), "changed",
-	                  G_CALLBACK (on_itemlist_selection_changed), ilv);
+	g_signal_connect (G_OBJECT (select), "changed", G_CALLBACK (on_itemlist_selection_changed), ilv);
 }
 
 void
@@ -442,7 +441,7 @@ item_list_view_update_item (ItemListView *ilv, itemPtr item)
 	
 	if (!item_list_view_id_to_iter (ilv, item->id, &iter))
 		return;
-	
+#ifdef DO_SORT_ORDER
 	time_str = (0 != item->time) ? date_format ((time_t)item->time, NULL) : g_strdup ("");
 
 	title = item->title && strlen (item->title) ? item->title : _("*** No title ***");
@@ -462,6 +461,7 @@ item_list_view_update_item (ItemListView *ilv, itemPtr item)
 		g_free (tmp);
 	}
 
+#endif
 	state_icon = item->flagStatus ? icon_get (ICON_FLAG) :
 	             !item->readStatus ? icon_get (ICON_UNREAD) :
 		     NULL;
@@ -476,16 +476,16 @@ item_list_view_update_item (ItemListView *ilv, itemPtr item)
 
 	gtk_tree_store_set (itemstore,
 	                    &iter,
-		            IS_LABEL, title,
-			    IS_TIME_STR, time_str,
+		            IS_LABEL, item->title,
+			    IS_TIME_STR, item->timestr,
 			    IS_STATEICON, state_icon,
 			    ITEMSTORE_UNREAD, fontWeight,
 			    ITEMSTORE_ALIGN, item_list_title_alignment (title),
 	                    ITEMSTORE_WEIGHT, item->readStatus ? PANGO_WEIGHT_NORMAL : PANGO_WEIGHT_BOLD,
 			    -1);
 
-	g_free (time_str);
-	g_free (title);
+	// g_free (time_str);
+	// g_free (title);
 }
 
 static void
@@ -724,6 +724,7 @@ item_list_view_create (gboolean wide)
 	renderer = gtk_cell_renderer_pixbuf_new ();
 	column = gtk_tree_view_column_new_with_attributes ("", renderer, "pixbuf", IS_STATEICON, NULL);
 	gtk_tree_view_append_column (ilv->priv->treeview, column);
+#ifdef DO_SORT_ORDER
 	ilv->priv->stateColumn = column;
 	gtk_tree_view_column_set_sort_column_id (column, IS_STATE);
 	if (wide)
@@ -733,6 +734,7 @@ item_list_view_create (gboolean wide)
 	column = gtk_tree_view_column_new_with_attributes ("", renderer, "pixbuf", IS_ENCICON, NULL);
 	gtk_tree_view_append_column (ilv->priv->treeview, column);
 	ilv->priv->enclosureColumn = column;
+#endif
 
 	renderer = gtk_cell_renderer_text_new ();
 	column = gtk_tree_view_column_new_with_attributes (_("Date"), renderer, 
@@ -740,7 +742,7 @@ item_list_view_create (gboolean wide)
 	                                                   "weight", ITEMSTORE_WEIGHT,
 							   NULL);
 	gtk_tree_view_append_column (ilv->priv->treeview, column);
-	gtk_tree_view_column_set_sort_column_id(column, IS_TIME);
+	// gtk_tree_view_column_set_sort_column_id(column, IS_TIME);
 	g_object_set (column, "resizable", TRUE, NULL);
 	if (wide) {
 		gtk_tree_view_column_set_visible (column, FALSE);
@@ -749,7 +751,7 @@ item_list_view_create (gboolean wide)
 
 	renderer = gtk_cell_renderer_pixbuf_new ();
 	column = gtk_tree_view_column_new_with_attributes ("", renderer, "pixbuf", IS_FAVICON, NULL);
-	gtk_tree_view_column_set_sort_column_id (column, IS_SOURCE);
+	// gtk_tree_view_column_set_sort_column_id (column, IS_SOURCE);
 	gtk_tree_view_append_column (ilv->priv->treeview, column);
 	ilv->priv->faviconColumn = column;
 	
@@ -816,7 +818,11 @@ item_list_view_add_item_to_tree_store (ItemListView *ilv, GtkTreeStore *itemstor
 		                       IS_NR, item->id,
 				       IS_PARENT, node,
 		                       IS_FAVICON, ilv->priv->wideView?node_get_large_icon (node):node_get_icon (node),
+#ifdef DO_ENCLOSURE_ICON
 		                       IS_ENCICON, item->hasEnclosure?icon_get (ICON_ENCLOSURE):NULL,
+#else
+		                       IS_ENCICON, NULL,
+#endif
 				       IS_ENCLOSURE, item->hasEnclosure,
 				       IS_SOURCE, node,
 				       IS_STATE, state,
