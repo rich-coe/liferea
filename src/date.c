@@ -44,7 +44,7 @@
 #include "debug.h"
 #include "e-date.h"
 
-#define	TIMESTRLEN	256
+#define	TIMESTRLEN	25
 
 /* date formatting methods */
 
@@ -72,7 +72,7 @@ date_format_nice (time_t date)
 		done = TRUE;
 	}*/
 
-	if (!done) {
+	if (0 && !done) {
 		if (then.tm_mday == now.tm_mday &&
 		    then.tm_mon == now.tm_mon &&
 		    then.tm_year == now.tm_year) {
@@ -81,7 +81,7 @@ date_format_nice (time_t date)
 			done = TRUE;
 		}
 	}
-	if (!done) {
+	if (0 && !done) {
 		yesdate = nowdate - 60 * 60 * 24;
 		localtime_r (&yesdate, &yesterday);
 		if (then.tm_mday == yesterday.tm_mday &&
@@ -92,16 +92,16 @@ date_format_nice (time_t date)
 			done = TRUE;
 		}
 	}
-	if (!done) {
+	if (0 && !done) {
 		int i;
-		for (i = 2; i < 7; i++) {
+		for (i = 0; i < 7; i++) {
 			yesdate = nowdate - 60 * 60 * 24 * i;
 			localtime_r (&yesdate, &yesterday);
 			if (then.tm_mday == yesterday.tm_mday &&
 			    then.tm_mon == yesterday.tm_mon &&
 			    then.tm_year == yesterday.tm_year) {
 			    	/* translation hint: date format for dates older than 2 days but not older than a week, reorder format codes as necessary */
-				e_utf8_strftime_fix_am_pm (buf, TIMESTRLEN, _("%a %l:%M %p"), &then);
+				e_utf8_strftime_fix_am_pm (buf, TIMESTRLEN, _("%a %H:%M"), &then);
 				done = TRUE;
 				break;
 			}
@@ -110,10 +110,10 @@ date_format_nice (time_t date)
 	if (!done) {
 		if (then.tm_year == now.tm_year) {
 			/* translation hint: date format for dates older than a week but from this year, reorder format codes as necessary */
-			e_utf8_strftime_fix_am_pm (buf, TIMESTRLEN, _("%b %d %l:%M %p"), &then);
+			e_utf8_strftime_fix_am_pm (buf, TIMESTRLEN, _("%m/%d %H:%M"), &then);
 		} else {
 			/* translation hint: date format for dates from the last years, reorder format codes as necessary */
-			e_utf8_strftime_fix_am_pm (buf, TIMESTRLEN, _("%b %d %Y"), &then);
+			e_utf8_strftime_fix_am_pm (buf, TIMESTRLEN, _("%Y/%m/%d"), &then);
 		}
 	}
 
