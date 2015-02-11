@@ -4,6 +4,7 @@
 *.o
 *.swp
 *.swo
+*.heap
 Makefile
 Makefile.in
 aclocal.m4
