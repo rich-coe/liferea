@@ -479,9 +479,8 @@ item_list_view_update_item (ItemListView *ilv, itemPtr item)
 		            IS_LABEL, item->title,
 			    IS_TIME_STR, item->timestr,
 			    IS_STATEICON, state_icon,
-			    ITEMSTORE_UNREAD, fontWeight,
+			    ITEMSTORE_WEIGHT, fontWeight,
 			    ITEMSTORE_ALIGN, item_list_title_alignment (title),
-	                    ITEMSTORE_WEIGHT, item->readStatus ? PANGO_WEIGHT_NORMAL : PANGO_WEIGHT_BOLD,
 			    -1);
 
 	// g_free (time_str);
