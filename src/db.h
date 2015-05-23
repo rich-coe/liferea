@@ -113,6 +113,7 @@ itemPtr	db_item_load(gulong id);
  * @param item		the item
  */
 void	db_item_update(itemPtr item);
+void	db_item_update_quick(itemPtr item);
 
 /**
  * Removes the given item from the DB
@@ -216,4 +217,6 @@ void db_node_update (nodePtr node);
  */
 void db_node_cleanup (nodePtr root);
 
+void db_begin_transaction (void);
+void db_end_transaction (void);
 #endif
