@@ -441,7 +441,7 @@ item_list_view_update_item (ItemListView *ilv, itemPtr item)
 	
 	if (!item_list_view_id_to_iter (ilv, item->id, &iter))
 		return;
-#ifdef DO_SORT_ORDER
+#ifndef DO_SORT_ORDER
 	time_str = (0 != item->time) ? date_format ((time_t)item->time, NULL) : g_strdup ("");
 
 	title = item->title && strlen (item->title) ? item->title : _("*** No title ***");
@@ -476,7 +476,7 @@ item_list_view_update_item (ItemListView *ilv, itemPtr item)
 
 	gtk_tree_store_set (itemstore,
 	                    &iter,
-		            IS_LABEL, item->title,
+		            IS_LABEL, title,
 			    IS_TIME_STR, item->timestr,
 			    IS_STATEICON, state_icon,
 			    ITEMSTORE_WEIGHT, fontWeight,
@@ -626,9 +626,12 @@ on_item_list_view_button_press_event (GtkWidget *treeview, GdkEventButton *event
 				   state, favicon and enclosure column. We depend
 				   on the fact that those columns are all left 
 				   of the headline column !!! */
-				if (event->x <= (gtk_tree_view_column_get_width (ilv->priv->stateColumn) +
-				                 gtk_tree_view_column_get_width (ilv->priv->enclosureColumn) +
-				                 gtk_tree_view_column_get_width (ilv->priv->faviconColumn))) {
+				if (event->x <= (
+#ifdef DO_ENCLOSURE_ICON
+                                gtk_tree_view_column_get_width (ilv->priv->stateColumn) +
+                                gtk_tree_view_column_get_width (ilv->priv->enclosureColumn) +
+#endif
+                                gtk_tree_view_column_get_width (ilv->priv->faviconColumn))) {
 					itemlist_toggle_flag (item);
 					result = TRUE;
 				}
