@@ -479,12 +479,14 @@ item_list_view_update_item (ItemListView *ilv, itemPtr item)
 		            IS_LABEL, title,
 			    IS_TIME_STR, item->timestr,
 			    IS_STATEICON, state_icon,
-			    ITEMSTORE_WEIGHT, fontWeight,
 			    ITEMSTORE_ALIGN, item_list_title_alignment (title),
+	                    ITEMSTORE_WEIGHT, fontWeight,
 			    -1);
 
-	// g_free (time_str);
-	// g_free (title);
+#ifndef DO_SORT_ORDER
+	g_free (time_str);
+	g_free (title);
+#endif
 }
 
 static void
