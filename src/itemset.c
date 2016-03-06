@@ -103,6 +103,7 @@ itemset_generic_merge_check (GList *items, itemPtr newItem, gint maxChecks, gboo
 
 		/* just for the case there are no ids: compare titles and HTML descriptions */
 		equal = TRUE;
+                reason = 0;
 
 		if (((item_get_title (oldItem) != NULL) && (item_get_title (newItem) != NULL)) && 
 		     (0 != strcmp (item_get_title (oldItem), item_get_title (newItem)))) {
@@ -123,11 +124,11 @@ itemset_generic_merge_check (GList *items, itemPtr newItem, gint maxChecks, gboo
 
 				if (allowStateChanges) {
 					/* found corresponding item, check if they are REALLY equal (eg, read status may have changed) */
-					if(oldItem->readStatus != newItem->readStatus) {
+					if(0 && oldItem->readStatus != newItem->readStatus) {
 						equal = FALSE;
 						reason |= 4;
 					}
-					if(oldItem->flagStatus != newItem->flagStatus) {
+					if(0 && oldItem->flagStatus != newItem->flagStatus) {
 						equal = FALSE;
 						reason |= 8;
 					}
@@ -183,7 +184,7 @@ itemset_generic_merge_check (GList *items, itemPtr newItem, gint maxChecks, gboo
 					oldItem->flagStatus = newItem->flagStatus;
 				}
 				
-				db_item_update (oldItem);
+				db_item_update_quick (oldItem);
 				debug1 (DEBUG_CACHE, "-> item already existing and was updated, reason %x", reason);
 			} else {
 				debug0 (DEBUG_CACHE, "-> item updates not merged because of parser errors");
@@ -222,7 +223,7 @@ itemset_merge_item (itemSetPtr itemSet, GList *items, itemPtr item, gint maxChec
 			item->parentNodeId = g_strdup (itemSet->nodeId);
 		
 		/* step 1: write item to DB */
-		db_item_update (item);
+		db_item_update_quick (item);
 		
 		/* step 2: add to itemset */
 		itemSet->ids = g_list_prepend (itemSet->ids, GUINT_TO_POINTER (item->id));
@@ -305,6 +306,8 @@ itemset_merge_items (itemSetPtr itemSet, GList *list, gboolean allowUpdates, gbo
 	debug_start_measurement (DEBUG_UPDATE);
 	
 	debug2 (DEBUG_UPDATE, "old item set %p of (node id=%s):", itemSet, itemSet->nodeId);
+
+        db_begin_transaction();
 	
 	/* 1. Preparation: determine effective maximum cache size 
 	
@@ -433,6 +436,7 @@ itemset_merge_items (itemSetPtr itemSet, GList *list, gboolean allowUpdates, gbo
 	
 	g_list_free (items);
 	
+        db_end_transaction();
 	debug_end_measurement (DEBUG_UPDATE, "merge itemset");
 	
 	return newCount;

@@ -1152,6 +1152,7 @@ msgid "Launches the item's link in a new Liferea browser tab."
 msgstr "設定したブラウザでトピックのリンクを開きます"
 
 #: ../src/ui/liferea_shell.c:1050 ../src/ui/popup_menu.c:129
+#, fuzzy
 msgid "_Open In Browser"
 msgstr "ブラウザで開く(_O)"
 

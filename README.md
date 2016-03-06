@@ -1,3 +1,26 @@
+Fork
+----
+This is a fork of liferea for my enhancements.
+
+17 Sep 2014
+- do not add existing item as new if the feed does not provide a timestamp  (src/itemset.c)
+- preform null check before use  (src/ui/item_list_view.c)
+- save feed parse error before trying auto discover; restore error if auto fails (src/feed_parser.c)
+
+18 Sep 2014
+- keep read (or un-toggled) items displayed in the search folder 'Unread' ('Important') until the user
+  leaves the folder.   (src/item.h, src/itemlist.c, src/ui/item_list_view.c)
+  Useful for double-clicks, keyboard accidents, and going back to the previous item.  Also useful because 
+  the 'Unread' folder doesn't scroll as items are added like the main folder does and finding where you 
+  left off reading unread items is easier in the 'Unread' folder.  I've been reading from the 'main' 
+  folder since I started using liferea because reading from 'Unread' was unsettling as the previous read 
+  item disappeared when reading from 'Unread', and it made it nigh on impossible to look at a previous item.
+
+
+
+This documentation was last updated for Liferea version 1.11 (02.06.2014).
+
+git master status: 
 ![build status git master](https://travis-ci.org/lwindolf/liferea.svg?branch=master) ![Coverity Scan Build Status](https://scan.coverity.com/projects/4287/badge.svg)
 
 
@@ -29,7 +52,7 @@ help you asap.
 
 ###### _Dependencies_
 
-Mandatory:
+###### Mandatory:
 
    gtk3 libxml2 libxslt sqlite3 libwebkit3 libjson-glib libgirepository1.0 libpeas gsettings-desktop-schemas
 

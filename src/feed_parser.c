@@ -215,8 +215,19 @@ feed_parse (feedParserCtxtPtr ctxt)
 	} while(0);
 	
 	/* if the given URI isn't valid we need to start auto discovery */
-	if(ctxt->failed)
+	if(ctxt->failed) {
+                GString *savedErrors = ctxt->feed->parseErrors;
+                ctxt->feed->parseErrors = g_string_new(NULL);
 		feed_parser_auto_discover (ctxt);
+                if (ctxt->failed) {
+                    // auto failed, restore old failure message
+                    g_string_free (ctxt->feed->parseErrors, TRUE);
+                    ctxt->feed->parseErrors = savedErrors;
+                } else {
+                    // auto worked, release old failure message
+                    g_string_free (savedErrors, TRUE);
+                }
+        }
 
 	if(ctxt->failed) {
 		/* Autodiscovery failed */

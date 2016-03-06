@@ -40,6 +40,8 @@ struct pair {
 	GSList		*data;		/** list of metadata values */
 };
 
+void metadata_list_free_pair (struct pair *px);
+
 /* register metadata types to check validity on adding */
 static void
 metadata_init (void)
