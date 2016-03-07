@@ -351,7 +351,7 @@ liferea_webkit_decide_policy (WebKitWebView *view,
  *  e.g. after a click on javascript:openZoom()
  */
 static WebKitWebView*
-webkit_create_web_view (WebKitWebView *view, void *frame)
+webkit_create_web_view (WebKitWebView *view, WebKitNavigationAction *action, gpointer user_data)
 {
 	LifereaHtmlView *htmlview;
 	GtkWidget	*container;
@@ -365,7 +365,7 @@ webkit_create_web_view (WebKitWebView *view, void *frame)
 	   with first a URL bar (sometimes invisble) and the HTML renderer
 	   as 2nd child */
 	children = gtk_container_get_children (GTK_CONTAINER (container));
-	htmlwidget = gtk_bin_get_child (GTK_BIN (children->next->data));
+	htmlwidget = children->next->data;
 
 	return WEBKIT_WEB_VIEW (htmlwidget);
 }
