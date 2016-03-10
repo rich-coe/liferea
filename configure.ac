@@ -53,6 +53,12 @@ PKG_CHECK_MODULES(PACKAGE, [$pkg_modules])
 AC_SUBST(PACKAGE_CFLAGS)
 AC_SUBST(PACKAGE_LIBS)
 
+PKG_CHECK_MODULES([WEB_EXTENSION], [
+                  webkit2gtk-web-extension-4.0
+                  ])
+AC_SUBST([WEB_EXTENSION_CFLAGS])
+AC_SUBST([WEB_EXTENSION_LIBS])
+
 uname=`uname`
 AC_DEFINE_UNQUOTED(OS, $uname, [defines a OS version string, used for OS specific code])
 AC_DEFINE_UNQUOTED(OSNAME, "$uname", [defines a OS version string, used for the user agent string])
@@ -77,6 +83,7 @@ Makefile
 net.sf.liferea.gschema.xml
 src/Makefile
 src/webkit/Makefile
+src/webkit/web_extension/Makefile
 src/parsers/Makefile
 src/fl_sources/Makefile
 src/ui/Makefile
