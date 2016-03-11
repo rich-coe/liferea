@@ -31,7 +31,13 @@
 #include "ui/browser_tabs.h"
 #include "ui/liferea_htmlview.h"
 
+#define LIFEREA_WEB_EXTENSION_OBJECT_PATH "/net/sf/liferea/WebExtension"
+#define LIFEREA_WEB_EXTENSION_BUS_NAME "net.sf.liferea.WebExtension"
+#define LIFEREA_WEB_EXTENSION_INTERFACE_NAME "net.sf.liferea.WebExtension"
+
 static WebKitSettings *settings = NULL;
+static GDBusConnection *dbus_connection = NULL;
+static GDBusServer *dbus_server = NULL;
 
 /**
  * Update the settings object if the preferences change.
@@ -102,6 +108,92 @@ webkit_get_font (guint *size)
 	return font;
 }
 
+static gboolean
+liferea_webkit_authorize_authenticated_peer (GDBusAuthObserver 	*observer,
+					     GIOStream		*stream,
+					     GCredentials	*credentials,
+					     gpointer		user_data)
+{
+	gboolean authorized = FALSE;
+	GCredentials *own_credentials = NULL;
+	GError *error = NULL;
+
+	if (!credentials) {
+		g_printerr ("No credentials received from web extension.\n");
+		return FALSE;
+	}
+
+	own_credentials = g_credentials_new ();
+
+	if (g_credentials_is_same_user (credentials, own_credentials, &error)) {
+		authorized = TRUE;
+	} else {
+		g_printerr ("Error authorizing web extension : %s\n", error->message);
+		g_error_free (error);
+	}
+	g_object_unref (own_credentials);
+
+	return authorized;
+}
+
+
+static gboolean
+liferea_webkit_on_new_dbus_connection (GDBusServer *server, GDBusConnection *connection, gpointer user_data)
+{
+	if (dbus_connection != NULL) {
+		/* There should be only one instance of the extension so webkit likely restarted. */
+		g_warning ("Web extension reconnecting. \n");
+		g_object_unref (dbus_connection);
+	}
+	dbus_connection = g_object_ref (connection);
+	return TRUE;
+}
+
+static void
+liferea_webkit_initialize_web_extensions (WebKitWebContext 	*context,
+					  gpointer		user_data)
+{
+	gchar 	*guid = NULL;
+	gchar 	*address = NULL;
+	gchar 	*server_address = NULL;
+	GError	*error = NULL;
+	GDBusAuthObserver *observer = NULL;
+
+	guid = g_dbus_generate_guid ();
+	address = g_strdup_printf ("unix:tmpdir=%s", g_get_tmp_dir ());
+	observer = g_dbus_auth_observer_new ();
+
+	g_signal_connect (observer,
+			  "authorize-authenticated-peer",
+			  G_CALLBACK (liferea_webkit_authorize_authenticated_peer),
+			  NULL);
+
+	dbus_server = g_dbus_server_new_sync (address,
+					      G_DBUS_SERVER_FLAGS_NONE,//Flags
+					      guid,
+					      observer,
+					      NULL, //Cancellable
+					      &error);
+	g_free (guid);
+	g_free (address);
+	g_object_unref (observer);
+	if (dbus_server == NULL) {
+		g_printerr ("Error creating DBus server : %s\n", error->message);
+		g_error_free (error);
+		return;
+        }
+	g_dbus_server_start (dbus_server);
+
+	g_signal_connect (dbus_server,
+			  "new-connection",
+			  G_CALLBACK (liferea_webkit_on_new_dbus_connection),
+			  NULL);
+
+	webkit_web_context_set_web_extensions_directory (context, WEB_EXTENSIONS_DIR);
+	server_address = g_strdup (g_dbus_server_get_client_address (dbus_server));
+	webkit_web_context_set_web_extensions_initialization_user_data (context, g_variant_new_take_string (server_address));
+}
+
 /**
  * HTML renderer init method
  */
@@ -164,6 +256,13 @@ liferea_webkit_init (void)
 		G_CALLBACK (liferea_webkit_enable_plugins_cb),
 		NULL
 	);
+
+	/* Webkit web extensions */
+	g_signal_connect (
+		webkit_web_context_get_default (),
+		"initialize-web-extensions",
+		G_CALLBACK (liferea_webkit_initialize_web_extensions),
+		NULL);
 }
 
 /**
@@ -351,7 +450,7 @@ liferea_webkit_decide_policy (WebKitWebView *view,
  *  e.g. after a click on javascript:openZoom()
  */
 static WebKitWebView*
-webkit_create_web_view (WebKitWebView *view, void *frame)
+webkit_create_web_view (WebKitWebView *view, WebKitNavigationAction *action, gpointer user_data)
 {
 	LifereaHtmlView *htmlview;
 	GtkWidget	*container;
@@ -365,7 +464,7 @@ webkit_create_web_view (WebKitWebView *view, void *frame)
 	   with first a URL bar (sometimes invisble) and the HTML renderer
 	   as 2nd child */
 	children = gtk_container_get_children (GTK_CONTAINER (container));
-	htmlwidget = gtk_bin_get_child (GTK_BIN (children->next->data));
+	htmlwidget = children->next->data;
 
 	return WEBKIT_WEB_VIEW (htmlwidget);
 }
@@ -545,8 +644,7 @@ liferea_webkit_on_menu (WebKitWebView 	    *view,
 static GtkWidget *
 liferea_webkit_new (LifereaHtmlView *htmlview)
 {
-	WebKitWebView *view;
-
+	WebKitWebView 		*view;
 	view = WEBKIT_WEB_VIEW (webkit_web_view_new_with_settings (settings));
 
 	/** Pass LifereaHtmlView into the WebKitWebView object */
@@ -655,15 +753,29 @@ liferea_webkit_change_zoom_level (GtkWidget *webview, gfloat zoom_level)
 static gboolean
 liferea_webkit_has_selection (GtkWidget *webview)
 {
-	/* 
-	   Currently (libwebkit-1.0 1.2.0) this doesn't work:
+	GVariant *result = NULL;
+	GError *error = NULL;
+	gboolean has_selection;
 
-		return webkit_web_view_has_selection (view);
+	result = g_dbus_connection_call_sync (dbus_connection,
+		 LIFEREA_WEB_EXTENSION_BUS_NAME,
+		 LIFEREA_WEB_EXTENSION_OBJECT_PATH,
+		 LIFEREA_WEB_EXTENSION_INTERFACE_NAME,
+		 "HasSelection",
+		 g_variant_new ("(t)", webkit_web_view_get_page_id (WEBKIT_WEB_VIEW (webview))),
+		((const GVariantType *) "(b)"),
+		G_DBUS_CALL_FLAGS_NONE,
+		-1, /* Default timeout */
+		NULL,
+		&error);
+	if (result == NULL) {
+		g_printerr ("Error invoking hasSelection: %s\n", error->message);
+		g_error_free (error);
+		return FALSE;
+        }
+	g_variant_get (result, "(b)", &has_selection);
 
-	   So we use *_can_copy_clipboard() as a workaround.
-	*/
-	// FIXME : Those functions are not available anymore.
-	return TRUE;
+	return has_selection;
 }
 
 /**
@@ -687,37 +799,33 @@ liferea_webkit_get_zoom_level (GtkWidget *webview)
 /**
  * Scroll page down (via shortcut key)
  *
- * Copied from gtkhtml/gtkhtml.c
  */
-// FIXME : WebKitWebView manages its own scrolling, and no longer implements
-//         GtkScrollable.
 static gboolean
-liferea_webkit_scroll_pagedown (GtkWidget *scrollpane)
+liferea_webkit_scroll_pagedown (GtkWidget *webview)
 {
-/*
-	GtkScrolledWindow *itemview;
-	GtkAdjustment *vertical_adjustment;
-	gdouble old_value;
-	gdouble	new_value;
-	gdouble	limit;
+	GVariant *result = NULL;
+	GError *error = NULL;
+	gboolean scrolled;
 
-	itemview = GTK_SCROLLED_WINDOW (scrollpane);
-	g_assert (NULL != itemview);
-	vertical_adjustment = gtk_scrolled_window_get_vadjustment (itemview);
-	old_value = gtk_adjustment_get_value (vertical_adjustment);
-	new_value = old_value + gtk_adjustment_get_page_increment (vertical_adjustment);
-	limit = gtk_adjustment_get_upper (vertical_adjustment) - gtk_adjustment_get_page_size (vertical_adjustment);
-	if (new_value > limit) {
-		new_value = limit;
-	}
-	gtk_adjustment_set_value (vertical_adjustment, new_value);
-	gtk_scrolled_window_set_vadjustment (
-		GTK_SCROLLED_WINDOW (itemview),
-		vertical_adjustment
-	);
-	return (new_value > old_value);
-*/
-  return FALSE;
+	result = g_dbus_connection_call_sync (dbus_connection,
+		 LIFEREA_WEB_EXTENSION_BUS_NAME,
+		 LIFEREA_WEB_EXTENSION_OBJECT_PATH,
+		 LIFEREA_WEB_EXTENSION_INTERFACE_NAME,
+		"ScrollPageDown",
+		g_variant_new ("(t)", webkit_web_view_get_page_id (WEBKIT_WEB_VIEW (webview))),
+		((const GVariantType *) "(b)"),
+		G_DBUS_CALL_FLAGS_NONE,
+		-1, /* Default timeout */
+		NULL,
+		&error);
+	if (result == NULL) {
+		g_printerr ("Error invoking scrollPageDown: %s\n", error->message);
+		g_error_free (error);
+		return FALSE;
+        }
+	g_variant_get (result, "(b)", &scrolled);
+
+	return scrolled;
 }
 
 static void
