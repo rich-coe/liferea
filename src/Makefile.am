@@ -43,6 +43,7 @@ liferea_SOURCES = \
 	itemset.c itemset.h \
 	itemlist.c itemlist.h \
 	json.c json.h \
+	liferea_application.c liferea_application.h \
 	metadata.c metadata.h \
 	migrate.c migrate.h \
 	net.c net.h \
@@ -70,7 +71,8 @@ liferea_LDADD =	parsers/libliparsers.a \
 		$(PACKAGE_LIBS) \
 		$(INTLLIBS) \
 		$(WEBKIT_LIBS) \
-		$(INTROSPECTION_LIBS)
+		$(INTROSPECTION_LIBS) \
+		-lm
 
 EXTRA_DIST = $(srcdir)/liferea-add-feed.in
 DISTCLEANFILES = $(srcdir)/liferea-add-feed
@@ -79,11 +81,11 @@ AM_INSTALLCHECK_STD_OPTIONS_EXEMPT = liferea-add-feed
 -include $(INTROSPECTION_MAKEFILE)
 INTROSPECTION_GIRS = Liferea-3.0.gir
 
-Liferea-3.0.gir: liferea
+Liferea-3.0.gir: liferea$(EXEEXT)
 INTROSPECTION_SCANNER_ARGS = -I$(top_srcdir)/src --warn-all --accept-unprefixed --identifier-prefix=Liferea --verbose
 Liferea_3_0_gir_NAMESPACE = Liferea
 Liferea_3_0_gir_VERSION = 3.0
-Liferea_3_0_gir_PROGRAM = $(builddir)/liferea
+Liferea_3_0_gir_PROGRAM = $(builddir)/liferea$(EXEEXT)
 Liferea_3_0_gir_FILES = \
 	auth.c auth.h \
 	auth_activatable.c auth_activatable.h \
@@ -108,7 +110,7 @@ Liferea_3_0_gir_FILES = \
 	fl_sources/node_source.c fl_sources/node_source.h \
 	fl_sources/node_source_activatable.c fl_sources/node_source_activatable.h
 Liferea_3_0_gir_INCLUDES = Gtk-3.0 libxml2-2.0
-
+if HAVE_INTROSPECTION
 girdir = $(datadir)/liferea/gir-1.0
 gir_DATA = $(INTROSPECTION_GIRS)
 
@@ -118,3 +120,4 @@ typelib_DATA = $(INTROSPECTION_GIRS:.gir=.typelib)
 CLEANFILES = \
 	$(gir_DATA)	\
 	$(typelib_DATA)
+endif

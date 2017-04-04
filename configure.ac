@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([liferea],[1.11.7],[liferea-devel@lists.sourceforge.net])
+AC_INIT([liferea],[1.12-rc3],[liferea-devel@lists.sourceforge.net])
 AC_CANONICAL_HOST
 AC_CONFIG_SRCDIR([src/feedlist.c])
 
@@ -29,7 +29,7 @@ PKG_PROG_PKG_CONFIG()
 ################################################################################
 # Mandatory library dependencies
 
-pkg_modules="	gtk+-3.0 >= 3.4.0
+pkg_modules="	gtk+-3.0 >= 3.14.0
 		glib-2.0 >= 2.28.0
 		gio-2.0 >= 2.26.0
 		pango >= 1.4.0 
@@ -38,7 +38,7 @@ pkg_modules="	gtk+-3.0 >= 3.4.0
 		sqlite3 >= 3.7.0
 		gmodule-2.0 >= 2.0.0
 		gthread-2.0
-		libsoup-2.4 >= 2.28.2
+		libsoup-2.4 >= 2.42
 		webkit2gtk-4.0
 		json-glib-1.0
 		gobject-introspection-1.0

@@ -1,7 +1,112 @@
-To be released
+Open problems before 1.12 release
+
+	* Article skimming currently broken
+	* Tray icon needs to be auto-disabled along with a popup
+	  informing users who previously had it enabled
+
+2017-03-26   Lars Windolf <lars.windolf@gmx.de>
+
+	Version 1.12-rc3
+
+	* Fixes #459: Fixes GtkDoc warnings
+	  (Leiaz)
+	* Fixes #415: Filter commands are not asynchronous
+	  (Rich Coe)
+	* Fixes #363: Missing space above internal browser address bar
+	  (reported by nekohayo, patch by Mikel Olasagasti)
+	* Fixes #208: All "Unread" search folder items marked read at once
+	  (Leiaz)
+	* Fixes #251: Liferea does not always use theme icons when it is launched
+	  on system startup (reported by GreenLunar, fix by Leiaz)
+
+	* Updated Finnish translation (Jorma Karvonen)
+	* Updated Latvian translation (Rihards Prieditis)
+	* Updated Albanian translation (Bensik Bleta)
+	* Updated Hungarian translation (Balázs Úr)
+	* Updated Brazlian translation (Rafael Ferreira)
+	* Updated French translation (Guillaume Bernard)
+
+
+2016-11-11   Lars Windolf <lars.windolf@gmx.de>
+
+	Version 1.12-rc2
+
+	* Change all g_warnings() to g_print() for remote source
+	  to avoid "crashing" on errors.
+	* Reorganized all UI definitions in separate files to simplify
+	  GtkBuilder handling.
+	* Github #425: Add GeoRSS info and map link in item header
+	  (Mikel Olasagasti)
+	* Github #407: Replacing deprecated elements in preferences
+	  (Leiaz)
+	* Github #396: Create LifereaApplication type
+	  (Leiaz)
+	* Github #434: Partial RFC3229+feed support for bandwidth savings
+	  (Daniel Aleksandersen)
+
+	* Fixes Github #208: gtk_tree_store_get_path: assertion
+	  'iter->stamp == priv->stamp'
+	  (reported by Mno-hime)
+	* Fixes Github #403: Leftover OSM XSLT in item view
+	  (reported by Paul Gevers)
+	* Fixes Github #423: Internal browser shows files system on go-back
+	  (Leiaz, reported by Paul Gevers)
+
+	* Updated German translation
+	* Github #441: Updated French translation
+	  (Surfoo)
+
+
+2016-09-20   Lars Windolf <lars.windolf@gmx.de>
+
+	Version 1.12-rc1a
+
+	* Fixing missing header files
+
+2016-09-19   Lars Windolf <lars.windolf@gmx.de>
+
+	Version 1.12-rc1
+
+	* Github #348: Added support for downloading content that
+	  cannot be displayed by HTML widget (e.g. PDFs)
+	  (Leiaz)
+	* Github #355: Migrate to Python3 libpeas loader
+	  (patch by picsel2)
+	* Github #311: Upgrade to WebKit2
+	  (patch by Leiaz)
+	* Github #292: Show new item count in tray icon
+	  (patch by mozbugbox)
+	* Github #297: Minimize to systray on window close
+	  (patch by Hugo Arregui)
+	* Github #325: Auto-fitting, translated license
+	  (patches by GreenLunar and Adolfo Jayme-Barrientos)
+
+	* Fixes Github #73: Problem with favicon update
+	  (reported by asl97)
+	* Fixes Github #177, #350: Tray icon not scaled properly
+	  (patch by mozbugbox)
+	* Removes GeoIP rendering via OSM to avoid exposing
+	  users to remote JS library resources.
+	  (reported by Paul Gevers)
+	* Fixes Github #337: Case sensitive sorting
+	  (reported by Pi03k)
+	* Fixes Github #361: Show all enclosuers
+	  (Leiaz)
+	* Fixes Github #368: Segfault on liferea-feed-add
+	  (Leiaz)
+	* Fixes Github #382: Broken Auto-Detect/No Proxy setting
+	  (Leiaz)
+	* Fixes Github #383: Per feed don't use proxy setting is broken
+	  (reported by Leiaz)
 
 	* Github #309: Update of Japanese translation
 	  (IWAI, Masaharu)
+	* Github #329: Update of Hebrew translation
+	  (GreenLunar)
+	* Github #330: Update of Spanish translation
+	  (Adolfo Jayme-Barrientos)
+	* Update of Swedish translation
+	  (Andreas Ronnquist)
 
 
 2016-01-30   Lars Windolf <lars.windolf@gmx.de>

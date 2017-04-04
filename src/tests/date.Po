@@ -3,23 +3,29 @@
  /usr/include/glib-2.0/glib/gtypes.h \
  /usr/lib64/glib-2.0/include/glibconfig.h \
  /usr/include/glib-2.0/glib/gmacros.h \
- /usr/lib64/gcc/x86_64-suse-linux/4.9/include/stddef.h \
- /usr/lib64/gcc/x86_64-suse-linux/4.9/include-fixed/limits.h \
- /usr/lib64/gcc/x86_64-suse-linux/4.9/include-fixed/syslimits.h \
- /usr/include/limits.h /usr/include/features.h /usr/include/sys/cdefs.h \
- /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
- /usr/include/gnu/stubs-64.h /usr/include/bits/posix1_lim.h \
- /usr/include/bits/local_lim.h /usr/include/linux/limits.h \
- /usr/include/bits/posix2_lim.h /usr/include/bits/xopen_lim.h \
- /usr/include/bits/stdio_lim.h \
- /usr/lib64/gcc/x86_64-suse-linux/4.9/include/float.h \
+ /usr/lib64/gcc/x86_64-suse-linux/6/include/stddef.h \
+ /usr/lib64/gcc/x86_64-suse-linux/6/include-fixed/limits.h \
+ /usr/lib64/gcc/x86_64-suse-linux/6/include-fixed/syslimits.h \
+ /usr/include/limits.h /usr/include/bits/libc-header-start.h \
+ /usr/include/features.h /usr/include/sys/cdefs.h \
+ /usr/include/bits/wordsize.h /usr/include/bits/long-double.h \
+ /usr/include/gnu/stubs.h /usr/include/gnu/stubs-64.h \
+ /usr/include/bits/posix1_lim.h /usr/include/bits/local_lim.h \
+ /usr/include/linux/limits.h /usr/include/bits/posix2_lim.h \
+ /usr/include/bits/xopen_lim.h /usr/include/bits/stdio_lim.h \
+ /usr/lib64/gcc/x86_64-suse-linux/6/include/float.h \
  /usr/include/glib-2.0/glib/gversionmacros.h /usr/include/time.h \
  /usr/include/bits/time.h /usr/include/bits/types.h \
- /usr/include/bits/typesizes.h /usr/include/glib-2.0/glib/garray.h \
+ /usr/include/bits/typesizes.h /usr/include/bits/types/clock_t.h \
+ /usr/include/bits/types/time_t.h /usr/include/bits/types/struct_tm.h \
+ /usr/include/bits/types/struct_timespec.h \
+ /usr/include/bits/types/clockid_t.h /usr/include/bits/types/timer_t.h \
+ /usr/include/bits/types/struct_itimerspec.h \
+ /usr/include/glib-2.0/glib/garray.h \
  /usr/include/glib-2.0/glib/gasyncqueue.h \
  /usr/include/glib-2.0/glib/gthread.h \
  /usr/include/glib-2.0/glib/gatomic.h /usr/include/glib-2.0/glib/gerror.h \
- /usr/lib64/gcc/x86_64-suse-linux/4.9/include/stdarg.h \
+ /usr/lib64/gcc/x86_64-suse-linux/6/include/stdarg.h \
  /usr/include/glib-2.0/glib/gquark.h /usr/include/glib-2.0/glib/gutils.h \
  /usr/include/glib-2.0/glib/gbacktrace.h /usr/include/signal.h \
  /usr/include/bits/sigset.h /usr/include/bits/signum.h \
@@ -53,6 +59,8 @@
  /usr/include/glib-2.0/glib/gmappedfile.h \
  /usr/include/glib-2.0/glib/gmarkup.h \
  /usr/include/glib-2.0/glib/gmessages.h \
+ /usr/include/glib-2.0/glib/gvariant.h \
+ /usr/include/glib-2.0/glib/gvarianttype.h \
  /usr/include/glib-2.0/glib/goption.h \
  /usr/include/glib-2.0/glib/gpattern.h \
  /usr/include/glib-2.0/glib/gprimes.h /usr/include/glib-2.0/glib/gqsort.h \
@@ -70,9 +78,7 @@
  /usr/include/glib-2.0/glib/gtrashstack.h \
  /usr/include/glib-2.0/glib/gtree.h \
  /usr/include/glib-2.0/glib/gurifuncs.h \
- /usr/include/glib-2.0/glib/gvarianttype.h \
- /usr/include/glib-2.0/glib/gvariant.h \
- /usr/include/glib-2.0/glib/gversion.h \
+ /usr/include/glib-2.0/glib/guuid.h /usr/include/glib-2.0/glib/gversion.h \
  /usr/include/glib-2.0/glib/deprecated/gallocator.h \
  /usr/include/glib-2.0/glib/deprecated/gcache.h \
  /usr/include/glib-2.0/glib/deprecated/gcompletion.h \
@@ -124,19 +130,23 @@
 
 /usr/include/glib-2.0/glib/gmacros.h:
 
-/usr/lib64/gcc/x86_64-suse-linux/4.9/include/stddef.h:
+/usr/lib64/gcc/x86_64-suse-linux/6/include/stddef.h:
 
-/usr/lib64/gcc/x86_64-suse-linux/4.9/include-fixed/limits.h:
+/usr/lib64/gcc/x86_64-suse-linux/6/include-fixed/limits.h:
 
-/usr/lib64/gcc/x86_64-suse-linux/4.9/include-fixed/syslimits.h:
+/usr/lib64/gcc/x86_64-suse-linux/6/include-fixed/syslimits.h:
 
 /usr/include/limits.h:
+
+/usr/include/bits/libc-header-start.h:
 
 /usr/include/features.h:
 
 /usr/include/sys/cdefs.h:
 
 /usr/include/bits/wordsize.h:
+
+/usr/include/bits/long-double.h:
 
 /usr/include/gnu/stubs.h:
 
@@ -154,7 +164,7 @@
 
 /usr/include/bits/stdio_lim.h:
 
-/usr/lib64/gcc/x86_64-suse-linux/4.9/include/float.h:
+/usr/lib64/gcc/x86_64-suse-linux/6/include/float.h:
 
 /usr/include/glib-2.0/glib/gversionmacros.h:
 
@@ -166,6 +176,20 @@
 
 /usr/include/bits/typesizes.h:
 
+/usr/include/bits/types/clock_t.h:
+
+/usr/include/bits/types/time_t.h:
+
+/usr/include/bits/types/struct_tm.h:
+
+/usr/include/bits/types/struct_timespec.h:
+
+/usr/include/bits/types/clockid_t.h:
+
+/usr/include/bits/types/timer_t.h:
+
+/usr/include/bits/types/struct_itimerspec.h:
+
 /usr/include/glib-2.0/glib/garray.h:
 
 /usr/include/glib-2.0/glib/gasyncqueue.h:
@@ -176,7 +200,7 @@
 
 /usr/include/glib-2.0/glib/gerror.h:
 
-/usr/lib64/gcc/x86_64-suse-linux/4.9/include/stdarg.h:
+/usr/lib64/gcc/x86_64-suse-linux/6/include/stdarg.h:
 
 /usr/include/glib-2.0/glib/gquark.h:
 
@@ -274,6 +298,10 @@
 
 /usr/include/glib-2.0/glib/gmessages.h:
 
+/usr/include/glib-2.0/glib/gvariant.h:
+
+/usr/include/glib-2.0/glib/gvarianttype.h:
+
 /usr/include/glib-2.0/glib/goption.h:
 
 /usr/include/glib-2.0/glib/gpattern.h:
@@ -314,9 +342,7 @@
 
 /usr/include/glib-2.0/glib/gurifuncs.h:
 
-/usr/include/glib-2.0/glib/gvarianttype.h:
-
-/usr/include/glib-2.0/glib/gvariant.h:
+/usr/include/glib-2.0/glib/guuid.h:
 
 /usr/include/glib-2.0/glib/gversion.h:
 

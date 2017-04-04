@@ -63,31 +63,31 @@ extern gboolean searchFolderRebuild; /* db.c */
 struct LifereaShellPrivate {
 	GtkBuilder	*xml;
 
-	GtkWindow	*window;		/**< Liferea main window */
+	GtkWindow	*window;		/*<< Liferea main window */
 	GtkWidget	*menubar;
 	GtkWidget	*toolbar;
 	GtkTreeView	*feedlistView;
 	
-	GtkStatusbar	*statusbar;		/**< main window status bar */
-	gboolean	statusbarLocked;	/**< flag locking important message on status bar */
-	guint		statusbarLockTimer;	/**< timer id for status bar lock reset timer */
+	GtkStatusbar	*statusbar;		/*<< main window status bar */
+	gboolean	statusbarLocked;	/*<< flag locking important message on status bar */
+	guint		statusbarLockTimer;	/*<< timer id for status bar lock reset timer */
 
 	GtkWidget	*statusbar_feedsinfo;
 	GtkWidget	*statusbar_feedsinfo_evbox;
 	GtkActionGroup	*generalActions;
-	GtkActionGroup	*addActions;		/**< all types of "New" options */
-	GtkActionGroup	*feedActions;		/**< update and mark read */
-	GtkActionGroup	*readWriteActions;	/**< node remove and properties, node itemset items remove */
-	GtkActionGroup	*itemActions;		/**< item state toggline, single item remove */
+	GtkActionGroup	*addActions;		/*<< all types of "New" options */
+	GtkActionGroup	*feedActions;		/*<< update and mark read */
+	GtkActionGroup	*readWriteActions;	/*<< node remove and properties, node itemset items remove */
+	GtkActionGroup	*itemActions;		/*<< item state toggline, single item remove */
 
 	ItemList	*itemlist;	
 	FeedList	*feedlist;
 	ItemView	*itemview;
 	BrowserTabs	*tabs;
 
-	PeasExtensionSet *extensions;		/**< Plugin management */
+	PeasExtensionSet *extensions;		/*<< Plugin management */
 
-	gboolean	fullscreen;		/**< track fullscreen */
+	gboolean	fullscreen;		/*<< track fullscreen */
 };
 
 enum {
@@ -198,20 +198,13 @@ liferea_shell_lookup (const gchar *name)
 static void
 liferea_shell_init (LifereaShell *ls)
 {
-	/* FIXME: we should only need to load mainwindow, but GtkBuilder won't
-	 * load the other required objects, so we need to do it manually...
-	 * See fixme in liferea_dialog_new()
-	 * http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=508585
-	 */
-	gchar *objs[] = { "adjustment6", "mainwindow", NULL };
 	/* globally accessible singleton */
 	g_assert (NULL == shell);
-	shell = ls;
-	
+	shell = ls;	
 	shell->priv = LIFEREA_SHELL_GET_PRIVATE (ls);
-	shell->priv->xml = gtk_builder_new ();
-	if (!gtk_builder_add_objects_from_file (shell->priv->xml, PACKAGE_DATA_DIR G_DIR_SEPARATOR_S PACKAGE G_DIR_SEPARATOR_S "liferea.ui", objs, NULL))
-		g_error ("Loading " PACKAGE_DATA_DIR G_DIR_SEPARATOR_S PACKAGE G_DIR_SEPARATOR_S  "liferea.ui failed");
+	shell->priv->xml = gtk_builder_new_from_file (PACKAGE_DATA_DIR G_DIR_SEPARATOR_S PACKAGE G_DIR_SEPARATOR_S "mainwindow.ui");
+	if (!shell->priv->xml)
+		g_error ("Loading " PACKAGE_DATA_DIR G_DIR_SEPARATOR_S PACKAGE G_DIR_SEPARATOR_S "mainwindow.ui failed");
 
 	gtk_builder_connect_signals (shell->priv->xml, NULL);
 }
@@ -562,8 +555,11 @@ on_notebook_scroll_event_null_cb (GtkWidget *widget, GdkEventScroll *event)
 static gboolean
 on_close (GtkWidget *widget, GdkEvent *event, gpointer user_data)
 {
+	guint signal_id = g_signal_lookup ("delete_event",  GTK_TYPE_WINDOW);
+
+	if (g_signal_has_handler_pending(widget, signal_id, NULL, TRUE))
+		return FALSE;
 	liferea_shutdown ();
-	
 	return TRUE;
 }
 
@@ -622,7 +618,13 @@ on_key_press_event (GtkWidget *widget, GdkEventKey *event, gpointer data)
 						   By ignoring the space here it will be passed to the HTML
 						   widget which in turn will pass it back if it is not eaten by
 						   any input field currently focussed. */
-						return FALSE;
+
+						/* pass through space keys only if HTML widget has the focus */
+						focusw = gtk_window_get_focus (GTK_WINDOW (widget));
+						type = g_type_name (G_OBJECT_TYPE (focusw));
+						if (type && (g_str_equal (type, "LifereaWebView")))
+							return FALSE;
+						break;
 					case 1:
 						modifier_matches = ((event->state & GDK_CONTROL_MASK) == GDK_CONTROL_MASK);
 						break;
@@ -662,7 +664,7 @@ on_key_press_event (GtkWidget *widget, GdkEventKey *event, gpointer data)
 
 		/* prevent usage of navigation keys in HTML view */
 		type = g_type_name (G_OBJECT_TYPE (focusw));
-		if (type && (g_str_equal (type, "WebKitWebView")))
+		if (type && (g_str_equal (type, "LifereaWebView")))
 			return FALSE;
 		
 		/* check for treeview navigation */
@@ -741,7 +743,7 @@ on_about_activate (GtkMenuItem *menuitem, gpointer user_data)
 {
 	GtkWidget *dialog;
 
-	dialog = liferea_dialog_new (NULL, "aboutdialog");
+	dialog = liferea_dialog_new ("about");
 	gtk_about_dialog_set_version (GTK_ABOUT_DIALOG (dialog), VERSION);
 	g_signal_connect (dialog, "response", G_CALLBACK (gtk_widget_hide), NULL);
 	gtk_widget_show (dialog);

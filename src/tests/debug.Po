@@ -1,23 +1,29 @@
 ../debug.o: ../debug.c /usr/include/stdc-predef.h ../../config.h \
- /usr/lib64/gcc/x86_64-suse-linux/4.9/include/stdarg.h \
- /usr/include/stdio.h /usr/include/features.h /usr/include/sys/cdefs.h \
- /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
+ /usr/lib64/gcc/x86_64-suse-linux/6/include/stdarg.h /usr/include/stdio.h \
+ /usr/include/bits/libc-header-start.h /usr/include/features.h \
+ /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h \
+ /usr/include/bits/long-double.h /usr/include/gnu/stubs.h \
  /usr/include/gnu/stubs-64.h \
- /usr/lib64/gcc/x86_64-suse-linux/4.9/include/stddef.h \
+ /usr/lib64/gcc/x86_64-suse-linux/6/include/stddef.h \
  /usr/include/bits/types.h /usr/include/bits/typesizes.h \
  /usr/include/libio.h /usr/include/_G_config.h /usr/include/wchar.h \
  /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
  /usr/include/bits/stdio.h /usr/include/time.h /usr/include/bits/time.h \
- /usr/include/xlocale.h /usr/include/glib-2.0/glib.h \
- /usr/include/glib-2.0/glib/galloca.h /usr/include/glib-2.0/glib/gtypes.h \
+ /usr/include/bits/types/clock_t.h /usr/include/bits/types/time_t.h \
+ /usr/include/bits/types/struct_tm.h \
+ /usr/include/bits/types/struct_timespec.h \
+ /usr/include/bits/types/clockid_t.h /usr/include/bits/types/timer_t.h \
+ /usr/include/bits/types/struct_itimerspec.h /usr/include/xlocale.h \
+ /usr/include/glib-2.0/glib.h /usr/include/glib-2.0/glib/galloca.h \
+ /usr/include/glib-2.0/glib/gtypes.h \
  /usr/lib64/glib-2.0/include/glibconfig.h \
  /usr/include/glib-2.0/glib/gmacros.h \
- /usr/lib64/gcc/x86_64-suse-linux/4.9/include-fixed/limits.h \
- /usr/lib64/gcc/x86_64-suse-linux/4.9/include-fixed/syslimits.h \
+ /usr/lib64/gcc/x86_64-suse-linux/6/include-fixed/limits.h \
+ /usr/lib64/gcc/x86_64-suse-linux/6/include-fixed/syslimits.h \
  /usr/include/limits.h /usr/include/bits/posix1_lim.h \
  /usr/include/bits/local_lim.h /usr/include/linux/limits.h \
  /usr/include/bits/posix2_lim.h \
- /usr/lib64/gcc/x86_64-suse-linux/4.9/include/float.h \
+ /usr/lib64/gcc/x86_64-suse-linux/6/include/float.h \
  /usr/include/glib-2.0/glib/gversionmacros.h \
  /usr/include/glib-2.0/glib/garray.h \
  /usr/include/glib-2.0/glib/gasyncqueue.h \
@@ -56,6 +62,8 @@
  /usr/include/glib-2.0/glib/gmappedfile.h \
  /usr/include/glib-2.0/glib/gmarkup.h \
  /usr/include/glib-2.0/glib/gmessages.h \
+ /usr/include/glib-2.0/glib/gvariant.h \
+ /usr/include/glib-2.0/glib/gvarianttype.h \
  /usr/include/glib-2.0/glib/goption.h \
  /usr/include/glib-2.0/glib/gpattern.h \
  /usr/include/glib-2.0/glib/gprimes.h /usr/include/glib-2.0/glib/gqsort.h \
@@ -73,9 +81,7 @@
  /usr/include/glib-2.0/glib/gtrashstack.h \
  /usr/include/glib-2.0/glib/gtree.h \
  /usr/include/glib-2.0/glib/gurifuncs.h \
- /usr/include/glib-2.0/glib/gvarianttype.h \
- /usr/include/glib-2.0/glib/gvariant.h \
- /usr/include/glib-2.0/glib/gversion.h \
+ /usr/include/glib-2.0/glib/guuid.h /usr/include/glib-2.0/glib/gversion.h \
  /usr/include/glib-2.0/glib/deprecated/gallocator.h \
  /usr/include/glib-2.0/glib/deprecated/gcache.h \
  /usr/include/glib-2.0/glib/deprecated/gcompletion.h \
@@ -84,18 +90,22 @@
  /usr/include/glib-2.0/glib/deprecated/gthread.h /usr/include/sys/types.h \
  /usr/include/endian.h /usr/include/bits/endian.h \
  /usr/include/bits/byteswap.h /usr/include/bits/byteswap-16.h \
- /usr/include/sys/select.h /usr/include/bits/select.h \
- /usr/include/sys/sysmacros.h /usr/include/pthread.h /usr/include/sched.h \
- /usr/include/bits/sched.h /usr/include/bits/setjmp.h \
+ /usr/include/bits/uintn-identity.h /usr/include/sys/select.h \
+ /usr/include/bits/select.h /usr/include/bits/types/struct_timeval.h \
+ /usr/include/sys/sysmacros.h /usr/include/bits/sysmacros.h \
+ /usr/include/pthread.h /usr/include/sched.h /usr/include/bits/sched.h \
+ /usr/include/bits/setjmp.h \
  /usr/include/glib-2.0/glib/glib-autocleanups.h ../debug.h
 
 /usr/include/stdc-predef.h:
 
 ../../config.h:
 
-/usr/lib64/gcc/x86_64-suse-linux/4.9/include/stdarg.h:
+/usr/lib64/gcc/x86_64-suse-linux/6/include/stdarg.h:
 
 /usr/include/stdio.h:
+
+/usr/include/bits/libc-header-start.h:
 
 /usr/include/features.h:
 
@@ -103,11 +113,13 @@
 
 /usr/include/bits/wordsize.h:
 
+/usr/include/bits/long-double.h:
+
 /usr/include/gnu/stubs.h:
 
 /usr/include/gnu/stubs-64.h:
 
-/usr/lib64/gcc/x86_64-suse-linux/4.9/include/stddef.h:
+/usr/lib64/gcc/x86_64-suse-linux/6/include/stddef.h:
 
 /usr/include/bits/types.h:
 
@@ -129,6 +141,20 @@
 
 /usr/include/bits/time.h:
 
+/usr/include/bits/types/clock_t.h:
+
+/usr/include/bits/types/time_t.h:
+
+/usr/include/bits/types/struct_tm.h:
+
+/usr/include/bits/types/struct_timespec.h:
+
+/usr/include/bits/types/clockid_t.h:
+
+/usr/include/bits/types/timer_t.h:
+
+/usr/include/bits/types/struct_itimerspec.h:
+
 /usr/include/xlocale.h:
 
 /usr/include/glib-2.0/glib.h:
@@ -141,9 +167,9 @@
 
 /usr/include/glib-2.0/glib/gmacros.h:
 
-/usr/lib64/gcc/x86_64-suse-linux/4.9/include-fixed/limits.h:
+/usr/lib64/gcc/x86_64-suse-linux/6/include-fixed/limits.h:
 
-/usr/lib64/gcc/x86_64-suse-linux/4.9/include-fixed/syslimits.h:
+/usr/lib64/gcc/x86_64-suse-linux/6/include-fixed/syslimits.h:
 
 /usr/include/limits.h:
 
@@ -155,7 +181,7 @@
 
 /usr/include/bits/posix2_lim.h:
 
-/usr/lib64/gcc/x86_64-suse-linux/4.9/include/float.h:
+/usr/lib64/gcc/x86_64-suse-linux/6/include/float.h:
 
 /usr/include/glib-2.0/glib/gversionmacros.h:
 
@@ -265,6 +291,10 @@
 
 /usr/include/glib-2.0/glib/gmessages.h:
 
+/usr/include/glib-2.0/glib/gvariant.h:
+
+/usr/include/glib-2.0/glib/gvarianttype.h:
+
 /usr/include/glib-2.0/glib/goption.h:
 
 /usr/include/glib-2.0/glib/gpattern.h:
@@ -305,9 +335,7 @@
 
 /usr/include/glib-2.0/glib/gurifuncs.h:
 
-/usr/include/glib-2.0/glib/gvarianttype.h:
-
-/usr/include/glib-2.0/glib/gvariant.h:
+/usr/include/glib-2.0/glib/guuid.h:
 
 /usr/include/glib-2.0/glib/gversion.h:
 
@@ -333,11 +361,17 @@
 
 /usr/include/bits/byteswap-16.h:
 
+/usr/include/bits/uintn-identity.h:
+
 /usr/include/sys/select.h:
 
 /usr/include/bits/select.h:
 
+/usr/include/bits/types/struct_timeval.h:
+
 /usr/include/sys/sysmacros.h:
+
+/usr/include/bits/sysmacros.h:
 
 /usr/include/pthread.h:
 

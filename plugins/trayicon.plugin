@@ -1,6 +1,6 @@
 [Plugin]
 Module=trayicon
-Loader=python
+Loader=python3
 Icon=preferences-desktop-accessibility
 IAge=2
 Name=Tray Icon (GNOME Classic)
@@ -11,6 +11,6 @@ Description[de]=Zeigt ein kleines Tray Icon an mit dem Liferea schnell angezeigt
 Description[he]=הצג סמל מגש מערכת קטן כדי להסתיר או להציג את Liferea
 Authors=Lars Windolf <lars.windolf@gmx.de>
 Copyright=Copyright © 2013 Lars Windolf
-Website=http://lzone.de/liferea/
-Help=http://lzone.de/liferea/
+Website=https://lzone.de/liferea/
+Help=https://lzone.de/liferea/
 

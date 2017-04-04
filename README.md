@@ -21,6 +21,8 @@ This is a fork of liferea for my enhancements.
 This documentation was last updated for Liferea version 1.11 (02.06.2014).
 
 git master status: 
+Note: Travis is disabled because of Webkit2 requiring Ubuntu 16.04+ not yet supported.
+
 ![build status git master](https://travis-ci.org/lwindolf/liferea.svg?branch=master) ![Coverity Scan Build Status](https://scan.coverity.com/projects/4287/badge.svg)
 
 
@@ -29,7 +31,7 @@ Introduction
 
 Liferea is a desktop feed reader/news aggregator that brings together all of the content from your favorite subscriptions into a simple interface that makes it easy to organize and browse feeds. Its GUI is similar to a desktop mail/newsclient, with an embedded graphical browser.
 
-![screenshot](http://lzone.de/liferea/screenshots/screenshot3.png)
+![screenshot](https://lzone.de/liferea/screenshots/screenshot3.png)
 
 
 
@@ -38,7 +40,7 @@ Installation from Package
 
 We do not provide packages, but others do. Detailed instructions on how to 
 get Liferea packages installed on the different distributions can 
-be found at http://lzone.de/liferea/install.htm
+be found at https://lzone.de/liferea/install.htm
 
 
 
@@ -54,12 +56,12 @@ help you asap.
 
 ###### Mandatory:
 
-   gtk3 libxml2 libxslt sqlite3 libwebkit3 libjson-glib libgirepository1.0 libpeas gsettings-desktop-schemas
+   gtk3 libxml2 libxslt sqlite3 libwebkit4 libjson-glib libgirepository1.0 libpeas gsettings-desktop-schemas
 
 Optional:
 
 - To use plugins:
-  - Python >= 2
+  - Python 3
 - For the media player plugin
   - GStreamer 0.10+ library and codecs
    
@@ -68,7 +70,7 @@ Optional:
 Download a tarball from https://github.com/lwindolf/liferea/releases
 and extract and compile with
 
-    tar jxvf liferea-1.11.0.tar.bz2 
+    tar jxvf liferea-1.12.0.tar.bz2 
     ./configure
     make
     make install
@@ -85,6 +87,16 @@ Then build it with:
     ./autogen.sh
     make
     make install
+
+If you compile with a --prefix directory which does not match $XDG_DATA_DIRS
+you will get a runtime error about the schema not being found. To workaround
+set $XDG_DATA_DIRS before starting Liferea. For example:
+
+    my_dir=$HOME/tmp/liferea
+    ./autogen.sh --prefix=$my_dir
+    make
+    make install
+    env XDG_DATA_DIRS="$my_dir/share:$XDG_DATA_DIRS" $my_dir/bin/liferea
 
 
 Contributing

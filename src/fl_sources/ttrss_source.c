@@ -75,7 +75,7 @@ ttrss_source_set_login_error (ttrssSourcePtr source, gchar *msg)
 	source->root->subscription->updateError = msg;
 	source->root->available = FALSE;
 
-	g_warning ("TinyTinyRSS login failed: error '%s'!\n", msg);
+	g_print ("TinyTinyRSS login failed: error '%s'!\n", msg);
 
 	node_source_set_state (source->root, NODE_SOURCE_STATE_NONE);
 }
@@ -310,7 +310,7 @@ ttrss_source_remove_node (nodePtr root, nodePtr node)
 
 	id = metadata_list_get (node->subscription->metadata, "ttrss-feed-id");
 	if (!id) {
-		g_warning ("Cannot remove node on remote side as ttrss-feed-id is unknown!");
+		g_print ("Cannot remove node on remote side as ttrss-feed-id is unknown!");
 		return;
 	}
 
@@ -360,7 +360,7 @@ ui_ttrss_source_get_account_info (void)
 {
 	GtkWidget	*dialog;
 	
-	dialog = liferea_dialog_new ("ttrss_source.ui", "ttrss_source_dialog");
+	dialog = liferea_dialog_new ("ttrss_source");
 	
 	g_signal_connect (G_OBJECT (dialog), "response",
 			  G_CALLBACK (on_ttrss_source_selected), 
