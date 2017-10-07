@@ -108,7 +108,8 @@ debug_start_measurement_func (const char * function)
 void
 debug_end_measurement_func (const char * function,
                             unsigned long flags, 
-			    const char *name)
+			    const char *name,
+                            int count)
 {
 	GTimeVal	*startTime = NULL;
 	GTimeVal	endTime;
@@ -138,11 +139,18 @@ debug_end_measurement_func (const char * function,
 		g_print ("[%p] ", g_thread_self ());
 	for (i = 0; i < debug_get_depth (); i++) 
 		g_print ("   ");
-	g_print ("= %s took %01ld,%03lds\n", name, 
+	g_print ("= %s took %01ld,%03lds ", name, 
 	                                   endTime.tv_sec - startTime->tv_sec, 
 					   endTime.tv_usec/1000);
-					     
+
 	duration = (endTime.tv_sec - startTime->tv_sec)*1000 + endTime.tv_usec/1000;
+
+        if (0 != count) {
+                float avg = ((float) duration ) / count;
+                g_print ("  count= %d  avg ms= %f\n", count, avg);
+        } else 
+                g_print ("\n");
+					     
 	if (duration > 250)
 		debug2 (DEBUG_PERF, "function \"%s\" is slow! Took %dms.", name, duration);
 }
@@ -227,5 +235,5 @@ debug_exit (const char *name)
 	debug1 (DEBUG_TRACE, "- %s", name);
 	
 	if (debug_level & DEBUG_PERF)
-		debug_end_measurement_func (name, DEBUG_PERF, name);
+		debug_end_measurement_func (name, DEBUG_PERF, name, 0);
 }

@@ -61,9 +61,11 @@ extern void debug_start_measurement_func (const char * function);
  *
  * Not thread-safe!
  */
-extern void debug_end_measurement_func (const char * function, unsigned long flags, const char *name);
+extern void debug_end_measurement_func (const char * function, unsigned long flags, const char *name, int count);
 
-#define debug_end_measurement(level, name) if ((debug_level) & level) debug_end_measurement_func (PRETTY_FUNCTION, level, name)
+#define debug_end_measurement(level, name) if ((debug_level) & level) debug_end_measurement_func (PRETTY_FUNCTION, level, name, 0)
+
+#define debug_end_measurement_count(level, name, count) if ((debug_level) & level) debug_end_measurement_func (PRETTY_FUNCTION, level, name, count)
 
 /**
  * Enable debugging for one or more of the given debugging flags.

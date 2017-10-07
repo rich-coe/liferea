@@ -38,15 +38,21 @@ void
 itemset_foreach (itemSetPtr itemSet, itemActionFunc callback)
 {
 	GList	*iter = itemSet->ids;
-	
+        int count = 0, found = 0;
+
+        debug_start_measurement (DEBUG_GUI);
 	while(iter) {
+                count++;
 		itemPtr item = item_load (GPOINTER_TO_UINT (iter->data));
 		if (item) {
+                        found++;
 			(*callback) (item);
 			item_unload (item);
 		}
 		iter = g_list_next (iter);
 	}
+        debug1 (DEBUG_GUI, "itemset_foreach found %d", found);
+        debug_end_measurement_count (DEBUG_GUI, "itemset_foreach", count);
 }
 
 // FIXME: this ought to be a subscription property!

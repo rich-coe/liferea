@@ -219,17 +219,33 @@ itemlist_filter_check_item (itemPtr item)
 	return TRUE;
 }
 
+static int dup_merge = 0;
+static int filter_merge = 0;
+static int add_merge = 0;
+
+static void itemlist_merge_count_reset()
+{
+    dup_merge = 0;
+    filter_merge = 0;
+    add_merge = 0;
+}
+
 static void
 itemlist_merge_item (itemPtr item) 
 {
-	if (!itemlist_duplicate_list_check_item (item))
+	if (!itemlist_duplicate_list_check_item (item)) {
+                dup_merge++;
 		return;		
+        }
 		
-	if (!itemlist_filter_check_item (item))
+	if (!itemlist_filter_check_item (item)) {
+                filter_merge++;
 		return;
+        }
 		
 	itemlist_duplicate_list_add_item (item);
 	itemview_add_item (item);
+        add_merge++;
 }
 
 /* Helper method checking if the passed item set is relevant
@@ -265,10 +281,12 @@ itemlist_merge_itemset (itemSetPtr itemSet)
 	debug_enter ("itemlist_merge_itemset");
 	
 	if (itemlist_itemset_is_valid (itemSet)) {
+                itemlist_merge_count_reset();
 		debug_start_measurement (DEBUG_GUI);
 		itemset_foreach (itemSet, itemlist_merge_item);
 		itemview_update ();
 		debug_end_measurement (DEBUG_GUI, "itemlist merge");
+                debug3(DEBUG_GUI, "itemlist merge dup %d filter %d add %d", dup_merge, filter_merge, add_merge);
 	}
 
 	debug_exit ("itemlist_merge_itemset");

@@ -815,7 +815,7 @@ item_list_view_create (gboolean wide)
 							   "xalign", ITEMSTORE_ALIGN,
 							   NULL);
 	gtk_tree_view_append_column (ilv->priv->treeview, headline_column);
-	gtk_tree_view_column_set_sort_column_id (headline_column, IS_LABEL);
+	// gtk_tree_view_column_set_sort_column_id (headline_column, IS_LABEL);
 	g_object_set (headline_column, "resizable", TRUE, NULL);
 	if (wide) {
 		g_object_set (renderer, "wrap-mode", PANGO_WRAP_WORD, NULL);
