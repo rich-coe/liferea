@@ -1,8 +1,27 @@
-Open problems before 1.12 release
+To be released
 
-	* Article skimming currently broken
-	* Tray icon needs to be auto-disabled along with a popup
-	  informing users who previously had it enabled
+	* Fixes unhiding from tray icon when activated via GApplication
+	  (when starting Liferea a 2nd time)
+	* #399: Reorder columns in 'Normal' email-like view
+	  to have the date column always at the end
+	  (Mikel Olasagasti)
+	* #532: Add plugin to make unread feeds titles bold
+	  (Yanko Kaneti)
+	* Workaround for #503: Liferea deanonymize Tor
+	  (Leiaz)
+	* Fixes #538: toggle_visibility() does not make a minimized window
+	  visible again
+	  (reported by Balló György)
+	* Fixes #522: Segfault when switching feed in combined view
+	  (patch by jonmstone)
+	* Fixes #419, #457: Handling of relative URLs in Atom parser
+	  (Leiaz)
+	* Added 'View Image' context menu option in HTML view
+	* Dropped del.icio.us from social bookmarking options
+	  as it is a read-only service now.
+	* Redesign of the wide view mode: larger titles with small text teasers
+	* Add AMP/HTML5 content enrichment feature
+
 
 2017-03-26   Lars Windolf <lars.windolf@gmx.de>
 
@@ -18,6 +37,7 @@ Open problems before 1.12 release
 	  (Leiaz)
 	* Fixes #251: Liferea does not always use theme icons when it is launched
 	  on system startup (reported by GreenLunar, fix by Leiaz)
+	* Change headline column sorting in wide view to time sorted
 
 	* Updated Finnish translation (Jorma Karvonen)
 	* Updated Latvian translation (Rihards Prieditis)

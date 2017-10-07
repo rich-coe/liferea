@@ -40,6 +40,7 @@
 #include "itemview.h"
 #include "newsbin.h"
 #include "social.h"
+#include "xml.h"
 #include "ui/browser_tabs.h"
 #include "ui/icons.h"
 #include "ui/liferea_shell.h"
@@ -258,17 +259,18 @@ void
 item_list_view_set_sort_column (ItemListView *ilv, nodeViewSortType sortType, gboolean sortReversed)
 {
 	gint sortColumn;
-	
 #ifdef notdef
 	switch (sortType) {
 		case NODE_VIEW_SORT_BY_TITLE:
-			sortColumn = IS_LABEL;
+			/* Some ugly switching here, because in wide view
+			   we do sort headlines by date */
+			if (ilv->priv->wideView)
+				sortColumn = IS_TIME;
+			else
+				sortColumn = IS_LABEL;
 			break;
 		case NODE_VIEW_SORT_BY_PARENT:
-			sortColumn = IS_PARENT;
-			break;
-		case NODE_VIEW_SORT_BY_STATE:
-			sortColumn = IS_STATE;
+			sortColumn = IS_SOURCE;
 			break;
 		case NODE_VIEW_SORT_BY_TIME:
 		default:
@@ -276,7 +278,6 @@ item_list_view_set_sort_column (ItemListView *ilv, nodeViewSortType sortType, gb
 			break;
 	}
 #endif
-	
 	gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (gtk_tree_view_get_model (ilv->priv->treeview)),
 	                                      IS_TIME, GTK_SORT_ASCENDING);
 }
@@ -348,8 +349,6 @@ itemlist_sort_column_changed_cb (GtkTreeSortable *treesortable, gpointer user_da
 			nodeSort = NODE_VIEW_SORT_BY_TITLE;
 			break;
 		case IS_STATE:
-			nodeSort = NODE_VIEW_SORT_BY_STATE;
-			break;
 		case IS_PARENT:
 		case IS_SOURCE:
 			nodeSort = NODE_VIEW_SORT_BY_PARENT;
@@ -479,17 +478,18 @@ item_list_view_update_item (ItemListView *ilv, itemPtr item)
 	title = g_strstrip (g_markup_escape_text (title, -1));
 
 	if (ilv->priv->wideView) {
-		/* Append date to headline on hidden date column */
-		const gchar	*important = " <span background='red' color='black'> important </span> ";
-		gchar		*tmp = title;
+		gchar *teaser = item_get_teaser (item);
+		gchar *tmp = title;
 
-		title = g_strdup_printf ("%s%s%s %s<span size='smaller' weight='light'>— (%s)</span>",
-		                         !item->readStatus?"<span weight='bold'>":"",
+		title = g_strdup_printf ("<span weight='%s' size='larger'>%s</span>\n<span weight='%s'>%s%s</span><span size='smaller' weight='ultralight'> — %s</span>",
+		                         item->readStatus?"normal":"ultrabold",
 		                         title,
-		                         (FALSE == item->readStatus)?"</span>":"",
-		                         item->flagStatus?important:"",
-		                         time_str);
+		                         item->readStatus?"ultralight":"light",
+		                         teaser?teaser:"",
+		                         teaser?"…":"",
+					 time_str);
 		g_free (tmp);
+		g_free (teaser);
 	}
 
 #endif
@@ -508,6 +508,7 @@ item_list_view_update_item (ItemListView *ilv, itemPtr item)
 	gtk_tree_store_set (itemstore,
 	                    &iter,
 		            IS_LABEL, title,
+	                    IS_TIME, item->time,
 			    IS_TIME_STR, item->timestr,
 			    IS_STATEICON, state_icon,
 			    ITEMSTORE_ALIGN, item_list_title_alignment (title),
@@ -545,7 +546,7 @@ item_list_view_update_all_items (ItemListView *ilv)
 	GtkTreeModel    *model;
 
 	model = gtk_tree_view_get_model (ilv->priv->treeview);
-        gtk_tree_model_get_iter_first (model, &iter);
+        valid = gtk_tree_model_get_iter_first (model, &iter);
 	while (valid) {
 		gtk_tree_model_get (model, &iter, IS_NR, &id, -1);
                 itemPtr	item = item_load (id);
@@ -669,17 +670,25 @@ on_item_list_view_button_press_event (GtkWidget *treeview, GdkEventButton *event
 		switch (eb->button) {
 			case 1:
 				/* Allow flag toggling when left clicking in the 
-				   state, favicon and enclosure column. We depend
+				   state or favicon column. We depend
 				   on the fact that those columns are all left 
 				   of the headline column !!! */
-				if (event->x <= (
 #ifdef DO_ENCLOSURE_ICON
-                                gtk_tree_view_column_get_width (ilv->priv->stateColumn) +
-                                gtk_tree_view_column_get_width (ilv->priv->enclosureColumn) +
+				if(gtk_tree_view_column_get_visible (ilv->priv->faviconColumn)){
+					if (event->x <= (
+                                        gtk_tree_view_column_get_width (ilv->priv->stateColumn) +
+                                        gtk_tree_view_column_get_width (ilv->priv->faviconColumn)
+                                        )) {
+						itemlist_toggle_flag (item);
+						result = TRUE;
+					}
+				} else 
 #endif
-                                gtk_tree_view_column_get_width (ilv->priv->faviconColumn))) {
-					itemlist_toggle_flag (item);
-					result = TRUE;
+                                {
+                                    if (event->x <= (gtk_tree_view_column_get_width (ilv->priv->stateColumn))) {
+                                        itemlist_toggle_flag (item);
+                                        result = TRUE;
+                                    }
 				}
 				break;
 			case 2:
@@ -749,9 +758,11 @@ item_list_view_create (gboolean wide)
 	GtkWidget 		*ilscrolledwindow;
 
 	ilv = g_object_new (ITEM_LIST_VIEW_TYPE, NULL);
+	ilv->priv->wideView = wide;
 		
 	ilscrolledwindow = gtk_scrolled_window_new (NULL, NULL);
 	gtk_widget_show (ilscrolledwindow);
+
 	if (wide)
 		gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (ilscrolledwindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	else
@@ -771,6 +782,7 @@ item_list_view_create (gboolean wide)
 
 	renderer = gtk_cell_renderer_pixbuf_new ();
 	column = gtk_tree_view_column_new_with_attributes ("", renderer, "gicon", IS_STATEICON, NULL);
+	g_object_set (renderer, "stock-size", wide?GTK_ICON_SIZE_LARGE_TOOLBAR:GTK_ICON_SIZE_SMALL_TOOLBAR, NULL);
 	gtk_tree_view_append_column (ilv->priv->treeview, column);
 #ifdef DO_SORT_ORDER
 	ilv->priv->stateColumn = column;
@@ -798,32 +810,48 @@ item_list_view_create (gboolean wide)
 	}
 
 	renderer = gtk_cell_renderer_pixbuf_new ();
+
 	column = gtk_tree_view_column_new_with_attributes ("", renderer, "gicon", IS_FAVICON, NULL);
-	if (wide) {
-		g_object_set (renderer, "stock-size", GTK_ICON_SIZE_DND, NULL);
-	} else {
-		g_object_set (renderer, "stock-size", GTK_ICON_SIZE_SMALL_TOOLBAR, NULL);
-	}
+	g_object_set (renderer, "stock-size", wide?GTK_ICON_SIZE_DIALOG:GTK_ICON_SIZE_SMALL_TOOLBAR, NULL);
 
 	// gtk_tree_view_column_set_sort_column_id (column, IS_SOURCE);
 	gtk_tree_view_append_column (ilv->priv->treeview, column);
 	ilv->priv->faviconColumn = column;
-	
+
+
 	renderer = gtk_cell_renderer_text_new ();
 	headline_column = gtk_tree_view_column_new_with_attributes (_("Headline"), renderer, 
 	                                                   "markup", IS_LABEL,
 							   "xalign", ITEMSTORE_ALIGN,
 							   NULL);
+	gtk_tree_view_column_set_expand (headline_column, TRUE);
 	gtk_tree_view_append_column (ilv->priv->treeview, headline_column);
-	// gtk_tree_view_column_set_sort_column_id (headline_column, IS_LABEL);
 	g_object_set (headline_column, "resizable", TRUE, NULL);
 	if (wide) {
+		// gtk_tree_view_column_set_sort_column_id (headline_column, IS_TIME);
 		g_object_set (renderer, "wrap-mode", PANGO_WRAP_WORD, NULL);
 		g_object_set (renderer, "wrap-width", 300, NULL);
 	} else {
+		// gtk_tree_view_column_set_sort_column_id (headline_column, IS_LABEL);
 		g_object_set (renderer, "ellipsize", PANGO_ELLIPSIZE_END, NULL);
 		gtk_tree_view_column_add_attribute (headline_column, renderer, "weight", ITEMSTORE_WEIGHT);
 	}
+
+	renderer = gtk_cell_renderer_pixbuf_new ();
+	column = gtk_tree_view_column_new_with_attributes ("", renderer, "gicon", IS_ENCICON, NULL);
+	gtk_tree_view_append_column (ilv->priv->treeview, column);
+	ilv->priv->enclosureColumn = column;
+
+	renderer = gtk_cell_renderer_text_new ();
+	column = gtk_tree_view_column_new_with_attributes (_("Date"), renderer,
+		                                           "text", IS_TIME_STR,
+	                                                   "weight", ITEMSTORE_WEIGHT,
+							   NULL);
+	gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_GROW_ONLY);
+	gtk_tree_view_append_column (ilv->priv->treeview, column);
+	// gtk_tree_view_column_set_sort_column_id(column, IS_TIME);
+	if (wide)
+		gtk_tree_view_column_set_visible (column, FALSE);
 
 	/* And connect signals */
 	g_signal_connect (G_OBJECT (ilv->priv->treeview), "button_press_event", G_CALLBACK (on_item_list_view_button_press_event), ilv);
@@ -906,10 +934,9 @@ item_list_view_enable_favicon_column (ItemListView *ilv, gboolean enabled)
 #ifdef DO_ENCLOSURE_ICON
 	gtk_tree_view_column_set_visible (ilv->priv->faviconColumn, enabled);
 #else
-	/* we depend on the fact that the second column is the favicon column!!! 
-	   if we are in search mode or have a folder or vfolder we show the favicon 
-	   column to give a hint where the item comes from ... */
-	gtk_tree_view_column_set_visible (gtk_tree_view_get_column (ilv->priv->treeview, 2), enabled);
+	// In wide view we want to save vertical space and hide the state column
+	if (ilv->priv->wideView)
+		gtk_tree_view_column_set_visible (ilv->priv->stateColumn, !enabled);
 #endif
 }
 
@@ -1007,17 +1034,12 @@ item_list_view_select (ItemListView *ilv, itemPtr item)
 {
 	GtkTreeView		*treeview = ilv->priv->treeview;
 	GtkTreeSelection	*selection;
+	GtkTreeIter		iter;
 	
 	selection = gtk_tree_view_get_selection (treeview);
 	
-	if (item) {
-		GtkTreeIter		iter;
-		GtkTreePath		*path;		
-		if (!item_list_view_id_to_iter(ilv, item->id, &iter))
-			/* This is an evil hack to fix SF #1870052: crash
-			   upon hitting <enter> when no headline selected.
-			   FIXME: This code is rotten! Rewrite it! Now! */
-			itemlist_selection_changed (NULL);
+	if (item && item_list_view_id_to_iter(ilv, item->id, &iter)){
+		GtkTreePath	*path = NULL;
 
 		path = gtk_tree_model_get_path (gtk_tree_view_get_model (treeview), &iter);
 		if (path) {
@@ -1026,6 +1048,8 @@ item_list_view_select (ItemListView *ilv, itemPtr item)
 			gtk_tree_path_free (path);
 		}
 	} else {
+		if (item)
+			g_warning ("item_list_view_select : attempt to select an item which is not present in the view.");
 		gtk_tree_selection_unselect_all (selection);
 	}
 }

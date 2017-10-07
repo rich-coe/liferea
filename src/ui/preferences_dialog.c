@@ -2,7 +2,7 @@
  * @file preferences_dialog.c Liferea preferences
  *
  * Copyright (C) 2004-2006 Nathan J. Conrad <t98502@users.sourceforge.net>
- * Copyright (C) 2004-2016 Lars Windolf <lars.windolf@gmx.de>
+ * Copyright (C) 2004-2017 Lars Windolf <lars.windolf@gmx.de>
  * Copyright (C) 2009 Hubert Figuiere <hub@figuiere.net>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -27,6 +27,7 @@
 #endif
 
 #include <libpeas-gtk/peas-gtk-plugin-manager.h>
+#include <webkit2/webkit2.h>
 
 #include "common.h"
 #include "conf.h"
@@ -63,7 +64,6 @@ enum fts_columns {
 	FTS_LEN
 };
 
-extern GSList *htmlviewPlugins;
 extern GSList *bookmarkSites;	/* from social.c */
 
 static PreferencesDialog *prefdialog = NULL;
@@ -593,6 +593,9 @@ preferences_dialog_init (PreferencesDialog *pd)
 	                            i);
 
 	/* ================= panel 5 "proxy" ======================== */
+
+#if WEBKIT_CHECK_VERSION (2, 15, 3)
+	gtk_widget_destroy (GTK_WIDGET (liferea_dialog_lookup (pd->priv->dialog, "proxyDisabledInfobar")));
 	conf_get_str_value (PROXY_HOST, &proxy_host);
 	gtk_entry_set_text (GTK_ENTRY (liferea_dialog_lookup (pd->priv->dialog, "proxyhostentry")), proxy_host);
 	g_free (proxy_host);
@@ -639,6 +642,13 @@ preferences_dialog_init (PreferencesDialog *pd)
 	g_signal_connect (G_OBJECT (liferea_dialog_lookup (pd->priv->dialog, "proxyportentry")), "changed", G_CALLBACK (on_proxyportentry_changed), pd);
 	g_signal_connect (G_OBJECT (liferea_dialog_lookup (pd->priv->dialog, "proxyusernameentry")), "changed", G_CALLBACK (on_proxyusernameentry_changed), pd);
 	g_signal_connect (G_OBJECT (liferea_dialog_lookup (pd->priv->dialog, "proxypasswordentry")), "changed", G_CALLBACK (on_proxypasswordentry_changed), pd);
+#else
+	gtk_widget_show (GTK_WIDGET (liferea_dialog_lookup (pd->priv->dialog, "proxyDisabledInfobar")));
+	gtk_widget_set_sensitive (GTK_WIDGET (liferea_dialog_lookup (pd->priv->dialog, "proxybox")), FALSE);
+	gtk_widget_set_sensitive (GTK_WIDGET (liferea_dialog_lookup (pd->priv->dialog, "proxyAutoDetectRadio")), TRUE);
+	gtk_widget_set_sensitive (GTK_WIDGET (liferea_dialog_lookup (pd->priv->dialog, "noProxyRadio")), FALSE);
+	gtk_widget_set_sensitive (GTK_WIDGET (liferea_dialog_lookup (pd->priv->dialog, "manualProxyRadio")), FALSE);
+#endif
 
 	/* ================= panel 6 "Privacy" ======================== */
 
@@ -686,16 +696,13 @@ preferences_dialog_init (PreferencesDialog *pd)
 	pd->priv->plugins_box = liferea_dialog_lookup (pd->priv->dialog, "plugins_box");
 	g_assert (pd->priv->plugins_box != NULL);
 
-	GtkWidget *alignment;
-
-	alignment = gtk_alignment_new (0., 0., 1., 1.);
-	gtk_alignment_set_padding (GTK_ALIGNMENT (alignment), 12, 12, 12, 12);
-
 	widget = peas_gtk_plugin_manager_new (NULL);
 	g_assert (widget != NULL);
-
-	gtk_container_add (GTK_CONTAINER (alignment), widget);
-	gtk_box_pack_start (GTK_BOX (pd->priv->plugins_box), alignment, TRUE, TRUE, 0);
+	gtk_widget_set_margin_start(widget, 12);
+	gtk_widget_set_margin_end(widget, 12);
+	gtk_widget_set_margin_top(widget, 12);
+	gtk_widget_set_margin_bottom(widget, 12);
+	gtk_box_pack_start (GTK_BOX (pd->priv->plugins_box), widget, TRUE, TRUE, 0);
 
 	g_signal_connect_object (pd->priv->dialog, "destroy", G_CALLBACK (preferences_dialog_destroy_cb), pd, 0);
 

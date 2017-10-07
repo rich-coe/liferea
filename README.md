@@ -23,7 +23,7 @@ This documentation was last updated for Liferea version 1.11 (02.06.2014).
 git master status: 
 Note: Travis is disabled because of Webkit2 requiring Ubuntu 16.04+ not yet supported.
 
-![build status git master](https://travis-ci.org/lwindolf/liferea.svg?branch=master) ![Coverity Scan Build Status](https://scan.coverity.com/projects/4287/badge.svg)
+[![Build Status](https://travis-ci.org/lwindolf/liferea.svg?branch=master)](https://travis-ci.org/lwindolf/liferea) ![Coverity Scan Build Status](https://scan.coverity.com/projects/4287/badge.svg)
 
 
 Introduction
