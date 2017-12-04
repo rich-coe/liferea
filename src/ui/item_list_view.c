@@ -465,15 +465,13 @@ item_list_view_update_item (ItemListView *ilv, itemPtr item)
 {
 	GtkTreeStore	*itemstore;
 	GtkTreeIter	iter;
-	gchar		*title, *time_str;
+	gchar		*title;
 	const GIcon	*state_icon;
         int fontWeight = PANGO_WEIGHT_BOLD;
 	
 	if (!item_list_view_id_to_iter (ilv, item->id, &iter))
 		return;
 #ifndef DO_SORT_ORDER
-	time_str = (0 != item->time) ? date_format ((time_t)item->time, NULL) : g_strdup ("");
-
 	title = item->title && strlen (item->title) ? item->title : _("*** No title ***");
 	title = g_strstrip (g_markup_escape_text (title, -1));
 
@@ -487,7 +485,7 @@ item_list_view_update_item (ItemListView *ilv, itemPtr item)
 		                         item->readStatus?"ultralight":"light",
 		                         teaser?teaser:"",
 		                         teaser?"…":"",
-					 time_str);
+					 item->timestr);
 		g_free (tmp);
 		g_free (teaser);
 	}
@@ -516,7 +514,6 @@ item_list_view_update_item (ItemListView *ilv, itemPtr item)
 			    -1);
 
 #ifndef DO_SORT_ORDER
-	g_free (time_str);
 	g_free (title);
 #endif
 }
@@ -784,12 +781,12 @@ item_list_view_create (gboolean wide)
 	column = gtk_tree_view_column_new_with_attributes ("", renderer, "gicon", IS_STATEICON, NULL);
 	g_object_set (renderer, "stock-size", wide?GTK_ICON_SIZE_LARGE_TOOLBAR:GTK_ICON_SIZE_SMALL_TOOLBAR, NULL);
 	gtk_tree_view_append_column (ilv->priv->treeview, column);
-#ifdef DO_SORT_ORDER
 	ilv->priv->stateColumn = column;
-	gtk_tree_view_column_set_sort_column_id (column, IS_STATE);
+	// gtk_tree_view_column_set_sort_column_id (column, IS_STATE);
 	if (wide)
 		gtk_tree_view_column_set_visible (column, FALSE);
 	
+#ifdef DO_ENCLOSURE_ICON
 	renderer = gtk_cell_renderer_pixbuf_new ();
 	column = gtk_tree_view_column_new_with_attributes ("", renderer, "gicon", IS_ENCICON, NULL);
 	gtk_tree_view_append_column (ilv->priv->treeview, column);
@@ -836,7 +833,7 @@ item_list_view_create (gboolean wide)
 		g_object_set (renderer, "ellipsize", PANGO_ELLIPSIZE_END, NULL);
 		gtk_tree_view_column_add_attribute (headline_column, renderer, "weight", ITEMSTORE_WEIGHT);
 	}
-
+#ifdef notdef
 	renderer = gtk_cell_renderer_pixbuf_new ();
 	column = gtk_tree_view_column_new_with_attributes ("", renderer, "gicon", IS_ENCICON, NULL);
 	gtk_tree_view_append_column (ilv->priv->treeview, column);
@@ -852,7 +849,7 @@ item_list_view_create (gboolean wide)
 	// gtk_tree_view_column_set_sort_column_id(column, IS_TIME);
 	if (wide)
 		gtk_tree_view_column_set_visible (column, FALSE);
-
+#endif
 	/* And connect signals */
 	g_signal_connect (G_OBJECT (ilv->priv->treeview), "button_press_event", G_CALLBACK (on_item_list_view_button_press_event), ilv);
 	g_signal_connect (G_OBJECT (ilv->priv->treeview), "row_activated", G_CALLBACK (on_Itemlist_row_activated), ilv);
