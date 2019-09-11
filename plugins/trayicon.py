@@ -1,7 +1,7 @@
 #
 # System Tray Icon Plugin
 #
-# Copyright (C) 2013 Lars Windolf <lars.lindner@gmail.com>
+# Copyright (C) 2013-2018 Lars Windolf <lars.windolf@gmx.de>
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Library General Public
@@ -108,10 +108,12 @@ class TrayiconPlugin (GObject.Object, Liferea.ShellActivatable):
         self.menu.show_all()
 
         self.window = self.shell.get_window()
-        self.minimize_to_tray_delete_handler = self.window.connect("delete_event",
-                                                                   self.trayicon_minimize_on_close)
-        self.minimize_to_tray_minimize_handler = self.window.connect("window-state-event",
-                                                                     self.window_state_event_cb)
+        self.delete_signal_id = GObject.signal_lookup("delete_event", Gtk.Window)
+        GObject.signal_handlers_block_matched (self.window,
+                                               GObject.SignalMatchType.ID | GObject.SignalMatchType.DATA,
+                                               self.delete_signal_id, 0, None, None, None)
+        self.window.connect("delete_event", self.trayicon_minimize_on_close)
+        self.window.connect("window-state-event", self.window_state_event_cb)
 
         # show the window if it is hidden when starting liferea
         self.window.deiconify()
@@ -133,7 +135,7 @@ class TrayiconPlugin (GObject.Object, Liferea.ShellActivatable):
         self.window.deiconify()
         self.window.show()
 
-    def trayicon_minimize_on_close(self, widget, data = None):
+    def trayicon_minimize_on_close(self, widget, event):
         self.window.hide()
         return True
 
@@ -169,6 +171,9 @@ class TrayiconPlugin (GObject.Object, Liferea.ShellActivatable):
         else:
             pix = self.read_pix
 
+        if None == pix:
+            return
+
         icon_size = self.staticon.props.size
         if pix.props.height < icon_size:
             pix = pix.scale_simple(icon_size, icon_size,
@@ -183,8 +188,11 @@ class TrayiconPlugin (GObject.Object, Liferea.ShellActivatable):
 
     def do_deactivate(self):
         self.staticon.set_visible(False)
-        self.window.disconnect(self.minimize_to_tray_delete_handler)
-        self.window.disconnect(self.minimize_to_tray_minimize_handler)
+        self.window.disconnect_by_func(self.trayicon_minimize_on_close)
+        GObject.signal_handlers_unblock_matched (self.window,
+                                                 GObject.SignalMatchType.ID | GObject.SignalMatchType.DATA,
+                                                 self.delete_signal_id, 0, None,None,None)
+        self.window.disconnect_by_func(self.window_state_event_cb)
 
         self.feedlist.disconnect(self.feedlist_new_items_cb_id)
 

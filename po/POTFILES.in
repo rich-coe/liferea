@@ -114,8 +114,6 @@ src/ui/popup_menu.c
 src/ui/popup_menu.h
 src/ui/preferences_dialog.c
 src/ui/preferences_dialog.h
-src/ui/feed_list_node.c
-src/ui/feed_list_node.h
 src/ui/subscription_dialog.c
 src/ui/subscription_dialog.h
 src/ui/browser_tabs.c
@@ -158,8 +156,6 @@ src/fl_sources/default_source.c
 src/fl_sources/default_source.h
 src/fl_sources/dummy_source.c
 src/fl_sources/dummy_source.h
-src/fl_sources/inoreader_source.c
-src/fl_sources/inoreader_source.h
 src/fl_sources/google_source.c
 src/fl_sources/google_source.h
 src/fl_sources/opml_source.c
@@ -189,8 +185,10 @@ src/webkit/web_extension/web_extension_main.c
 [type: gettext/glade]glade/auth.ui
 [type: gettext/glade]glade/enclosure_handler.ui
 [type: gettext/glade]glade/google_source.ui
-[type: gettext/glade]glade/inoreader_source.ui
+[tyep: gettext/glade]glade/liferea_menu.ui
+[tyep: gettext/glade]glade/liferea_toolbar.ui
 [type: gettext/glade]glade/mainwindow.ui
+[type: gettext/glade]glade/mark_read_dialog.ui
 [type: gettext/glade]glade/new_folder.ui
 [type: gettext/glade]glade/new_newsbin.ui
 [type: gettext/glade]glade/new_subscription.ui

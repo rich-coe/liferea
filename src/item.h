@@ -23,7 +23,6 @@
 #define _ITEM_H
 
 #include <glib.h>
-#include <time.h>
 
 /* Currently Liferea knows only a single type of items used
    for the itemset types feed, folder and search folder. So each 
@@ -159,6 +158,16 @@ gchar * item_get_teaser(itemPtr item);
  * Returns: (transfer full): newly allocated URI to be free'd using g_free()
  */
 gchar *	item_make_link(itemPtr item);
+
+/**
+ * item_get_author: (skip)
+ * @item:	the item
+ *
+ * Returns the resolved author for the item
+ *
+ * Returns: pointer to string in GSList meta data
+ */
+const gchar * item_get_author	(itemPtr item);
 
 /* Sets the item title */
 void		item_set_title(itemPtr item, const gchar * title);

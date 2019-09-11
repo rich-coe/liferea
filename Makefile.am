@@ -38,10 +38,14 @@ plugin_DATA = \
 	plugins/bold-unread.plugin \
 	plugins/gnome-keyring.py \
 	plugins/gnome-keyring.plugin \
+	plugins/headerbar.py \
+	plugins/headerbar.plugin \
 	plugins/libnotify.py \
 	plugins/libnotify.plugin \
 	plugins/media-player.py \
 	plugins/media-player.plugin \
+	plugins/plugin-installer.py \
+	plugins/plugin-installer.plugin \
 	plugins/trayicon.py \
 	plugins/trayicon.plugin
 

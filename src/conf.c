@@ -236,6 +236,13 @@ conf_set_str_value (const gchar *key, const gchar *value)
 }
 
 void
+conf_set_strv_value (const gchar *key, const gchar **value)
+{
+	g_assert (key != NULL);
+	g_settings_set_strv (settings, key, value);
+}
+
+void
 conf_set_int_value (const gchar *key, gint value)
 {
 	g_assert (key != NULL);
@@ -283,6 +290,18 @@ conf_get_str_value_from_schema (GSettings *gsettings, const gchar *key, gchar **
 }
 
 gboolean
+conf_get_strv_value_from_schema (GSettings *gsettings, const gchar *key, gchar ***value)
+{
+	g_assert (key != NULL);
+	g_assert (value != NULL);
+
+	if (gsettings == NULL)
+		gsettings = settings;
+	*value = g_settings_get_strv (gsettings, key);
+	return (NULL != value);
+}
+
+gboolean
 conf_get_int_value_from_schema (GSettings *gsettings, const gchar *key, gint *value)
 {
 	g_assert (key != NULL);
@@ -309,4 +328,11 @@ void
 conf_signal_connect (const gchar *signal, GCallback cb, gpointer data)
 {
 	g_signal_connect (settings, signal, cb, data);
+}
+
+void
+conf_bind (const gchar *key, gpointer object, const gchar *property, GSettingsBindFlags flags)
+{
+	g_assert (settings);
+	g_settings_bind (settings, key, object, property, flags);
 }
